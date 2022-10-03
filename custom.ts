@@ -328,15 +328,13 @@ namespace game {
     //% inlineInputMode=inline
     export function onGameOverExpanded(winStyle: winTypes, winEffect?: effects.BackgroundEffect) {
         if (!winStyle)
-            winStyle = winTypes.Win;
+            winStyle = winTypes.Score;
         if (!winEffect && winStyle != winTypes.Lose) {
             winEffect = effects.confetti;
         }
         else { winEffect = effects.melt; }
 
-        if (winStyle == winTypes.Win) {
-            game.over(true, winEffect)
-        } else if (winStyle == winTypes.Lose) {
+        if (winStyle ==  winTypes.Lose) {
             game.over(false, winEffect)
         } else {
             info.newGameOver(winStyle, winEffect);
