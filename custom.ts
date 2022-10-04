@@ -382,7 +382,7 @@ namespace ball {
     //% weight=99
     //% blockSetVariable=projectile
     //% inlineInputMode=inline
-    export function createProjectileBallFromSprite(img: Image, parentBall: Ball): Sprite {
+    export function createProjectileBallFromSprite(img: Image, parentBall: Ball): Ball {
         let vx = ball.xComponent(parentBall.angle, parentBall.pow);
         let vy = ball.yComponent(parentBall.angle, parentBall.pow);
         let ay = parentBall.gravity;
@@ -396,12 +396,11 @@ namespace ball {
      * The sprite auto-destroys when it leaves the screen. You can modify position after it's created.
      */
     //% group="Projectiles"
-    //% blockId=spritescreateprojectile block="projectile %img=screen_image_picker vx %vx vy %vy of kind %kind=spritekind||from sprite %parentBall=variables_get(myBall)"
-    //% weight=99 help=sprites/create-projectile
-    //% blockSetVariable=projectile
+    //% blockId=spritescreateprojectileball block="projectile %img=screen_image_picker vx %vx vy %vy of kind %kind=spritekind||from sprite %parentBall=variables_get(myBall)"
+    //% weight=99 
+    //% blockSetVariable=throwBall
     //% inlineInputMode=inline
     //% expandableArgumentMode=toggle
-    //% deprecated=true blockHidden=true
     export function createProjectileBall(img: Image, vx: number, vy: number, ax: number, ay: number, power:number, kind?: number, parentBall?: Ball) {
         const s = ball.create(img, kind || SpriteKind.Projectile);
         const sc = game.currentScene();
@@ -442,14 +441,6 @@ namespace ball {
 
         return s;
     }
-
-
-
-
-
-
-
-
 
 
 
