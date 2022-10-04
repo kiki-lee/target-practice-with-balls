@@ -13,14 +13,25 @@ enum winTypes {
     Win,
     //% block="lose game"
     Lose,
-    //% block="high score"
+    //% block="best score"
     Score,
-     //% block="seconds passed"
-    Seconds,
+    //% block="best time"
+    Timed,
     //% block="multiplayer"
     Multi,
-    //% block="custom"
+    //% block="custom" blockHidden
     Custom
+}
+
+enum scoreTypes {
+    //% block="high score"
+    Win,
+    //% block="low score"
+    Lose,
+    //% block="high time"
+    Score,
+    //% block="low time"
+    Seconds
 }
 
 enum speeds {
@@ -108,7 +119,7 @@ namespace info {
 
     }
 
-    export function newGameOver(winStyle: winTypes, fanfare: effects.BackgroundEffect, message?:string) {
+    export function newGameOver(winStyle: winTypes, fanfare: effects.BackgroundEffect, message?: string, scoreType?: scoreTypes, customScore?: number) {
 
         // Prep default variables for different win types
         let winnerNumber = 1;
@@ -149,17 +160,17 @@ namespace info {
         }
 
         //If not working in seconds, go with highest score
-        if (winStyle !== winTypes.Seconds) {
+        if (winStyle !== winTypes.Timed) {
             // If highest score is higher than saved high, replace
             if (thisBest > bestScore) {
                 newBest = true;
                 bestScore = thisBest;
                 info.setScore(thisBest);
                 info.saveHighScore();
-            } 
+            }
 
-        // If working in seconds, lower is better
-        } else {  
+            // If working in seconds, lower is better
+        } else {
 
             // For this mode, overwrite score with time elapsed
             thisBest = Math.floor(game.runtime() / 1000);  // Score doesn't seem to accept decimals
@@ -172,7 +183,7 @@ namespace info {
                 bestScore = thisBest;
                 settings.writeNumber("high-score", thisBest);
             }
-        
+
         }
 
 
@@ -188,7 +199,7 @@ namespace info {
 
         pause(400);
 
-        const overDialog = new GameOverDialog(true, thisBest, bestScore, newBest, winnerNumber, winStyle, timeElapsed, message);
+        const overDialog = new GameOverDialog(true, message, thisBest, bestScore, newBest);
         scene.createRenderable(scene.HUD_Z, target => {
             overDialog.update();
             target.drawTransparentImage(
@@ -209,14 +220,14 @@ namespace info {
         countdownInitialized = true;
 
         info.onCountdownEnd(function () {
-            
+
             //Handling manually to include number of seconds passed
             /*
             if (winStyle == winTypes.Win) {
                 game.over(true, fanfare)
             } else */ if (winStyle == winTypes.Lose) {
                 game.over(false, fanfare)
-            } else { 
+            } else {
                 newGameOver(winStyle, fanfare);
             }
         })
@@ -228,13 +239,10 @@ namespace info {
 
         constructor(
             protected win: boolean,
+            protected messageText: string,
             protected score?: number,
-            protected bestScore?: number,
-            protected newbestScore?: boolean,
-            protected winnerNum?: number,
-            protected winStyle?: winTypes,
-            protected numSeconds?: number,
-            protected userText?: string
+            protected best?: number,
+            protected newBest?: boolean
         ) {
             super(screen.width, 46, img`
         1 1 1
@@ -242,7 +250,7 @@ namespace info {
         1 1 1
         `);
             this.cursorOn = false;
-            
+
             /* Since best time is lower, need to do this elsewhere
             this.isNewbestScore = this.score > this.bestScore;
             */
@@ -263,53 +271,14 @@ namespace info {
 
         drawTextCore() {
             const titleHeight = 8;
+
+            this.image.printCenter(
+                this.messageText,
+                titleHeight,
+                screen.isMono ? 1 : 5,
+                image.font8
+            );
             
-            if (this.winStyle == winTypes.Win) {
-                this.image.printCenter(
-                    "You Win!",
-                    titleHeight,
-                    screen.isMono ? 1 : 5,
-                    image.font8
-                );
-            } else if (this.winStyle == winTypes.Multi) {
-                this.image.printCenter(
-                    "Player " + this.winnerNum + " wins!",
-                    titleHeight,
-                    screen.isMono ? 1 : 5,
-                    image.font8
-                );
-            } else if (this.winStyle == winTypes.Seconds) {
-                if (this.numSeconds !== undefined) {
-                    this.image.printCenter(
-                        "Finished in " + this.score + " seconds!",
-                        titleHeight,
-                        screen.isMono ? 1 : 5,
-                        image.font8
-                    );
-                }
-            } else if (this.winStyle == winTypes.Custom) {
-                if (this.numSeconds !== undefined) {
-                    this.image.printCenter(
-                        this.userText,
-                        titleHeight,
-                        screen.isMono ? 1 : 5,
-                        image.font8
-                    );
-                    this.image.printCenter(
-                        "Finished in " + this.score + " seconds!",
-                        titleHeight+10,
-                        screen.isMono ? 1 : 2,
-                        image.font5
-                    );
-                }
-            } else {
-                this.image.printCenter(
-                    "Great Job!",
-                    titleHeight,
-                    screen.isMono ? 1 : 5,
-                    image.font8
-                );
-            }
 
             if (this.score !== undefined) {
                 const scoreHeight = 23;
@@ -323,7 +292,7 @@ namespace info {
                     image.font8
                 );
 
-                if (this.newbestScore == true) {
+                if (this.newBest == true) {
                     this.image.printCenter(
                         "New Best Score!",
                         bestScoreHeight,
@@ -332,13 +301,13 @@ namespace info {
                     );
                 } else {
                     this.image.printCenter(
-                        "Best:" + this.bestScore,
+                        "Best:" + this.best,
                         bestScoreHeight,
                         scoreColor,
                         image.font8
                     );
                 }
-            } 
+            }
         }
     }
 }
@@ -357,12 +326,13 @@ namespace game {
     export function onGameOverExpanded(winStyle: winTypes, winEffect?: effects.BackgroundEffect) {
         if (!winStyle)
             winStyle = winTypes.Score;
-        if (!winEffect && winStyle != winTypes.Lose) {
-            winEffect = effects.confetti;
+        if (!winEffect) {
+            if (winStyle == winTypes.Lose) { winEffect = effects.melt; }
+            else { winEffect = effects.confetti; }
         }
-        else { winEffect = effects.melt; }
 
-        if (winStyle ==  winTypes.Lose) {
+
+        if (winStyle == winTypes.Lose) {
             game.over(false, winEffect)
         } else {
             info.newGameOver(winStyle, winEffect);
@@ -374,7 +344,7 @@ namespace game {
      */
     //% color="#8854d0"
     //% group=Gameplay
-    //% blockId=on_game_over_expanded
+    //% blockId=on_game_over_custom_expanded
     //% block="game over message $message || add effect $winEffect"
     //% message.defl="Game Over"
     //% winEffect.defl=effects.confetti
@@ -383,7 +353,7 @@ namespace game {
         if (!winEffect) {
             winEffect = effects.confetti;
         }
-            info.newGameOver(winTypes.Custom, winEffect, message);
+        info.newGameOver(winTypes.Custom, winEffect, message);
     }
 }
 
@@ -439,11 +409,11 @@ namespace ball {
      */
     //% group="Projectiles"
     //% blockId=spritescreateprojectileball block="projectile %img=screen_image_picker vx %vx vy %vy of kind %kind=spritekind||from sprite %parentBall=variables_get(myBall)"
-    //% weight=99 
+    //% weight=99
     //% blockSetVariable=throwBall
     //% inlineInputMode=inline
     //% expandableArgumentMode=toggle
-    export function createProjectileBall(img: Image, vx: number, vy: number, ax: number, ay: number, power:number, kind?: number, parentBall?: Ball) {
+    export function createProjectileBall(img: Image, vx: number, vy: number, ax: number, ay: number, power: number, kind?: number, parentBall?: Ball) {
         const s = ball.create(img, kind || SpriteKind.Projectile);
         const sc = game.currentScene();
 
