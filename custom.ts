@@ -142,7 +142,9 @@ namespace info {
             // If highest score is higher than saved high, replace
             if (thisHigh > highScore) {
                 newBest = true;
+                highScore = thisHigh;
                 info.saveHighScore();
+                info.setScore(thisHigh);
             } 
         } else {  // Best time for Seconds mode
 
@@ -158,7 +160,8 @@ namespace info {
             // Best time is least # of seconds in this mode
             if (thisHigh < highScore || highScore <= 0) {
                 newBest = true;
-                info.saveHighScore();
+                highScore = thisHigh;
+                settings.writeNumber("high-score", thisHigh);
             }
         
         }

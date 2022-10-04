@@ -3,6 +3,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     projectile2 = ball.createProjectileBallFromSprite(assets.image`ball0`, myBall)
+    game.onGameOverExpanded(winTypes.Seconds)
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Booth, function (sprite, otherSprite) {
     info.changeScoreBy(-1)
