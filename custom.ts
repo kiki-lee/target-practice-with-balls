@@ -112,9 +112,9 @@ namespace info {
 
         // Prep default variables for different win types
         let winnerNumber = 1;
-        let thisHigh = 0;
+        let thisBest = 0;
         let newBest = false;
-        let highScore = info.highScore();
+        let bestScore = 0;
 
 
         // Save number of seconds passed during game
@@ -128,7 +128,7 @@ namespace info {
         //Save player 1 score, no matter what
         const scoreInfo1 = info.player1.getState();
         info.setScore(scoreInfo1.score);
-        thisHigh = scoreInfo1.score;
+        thisBest = scoreInfo1.score;
 
         // Save other player's scores if it matters
         if (winStyle !== winTypes.Multi) {
@@ -141,8 +141,8 @@ namespace info {
 
             // Find player with highest score in Multi
             for (let i = 0; i < 4; i++) {
-                if (allScores[i] !== undefined && allScores[i] > thisHigh) {
-                    thisHigh = allScores[i];
+                if (allScores[i] !== undefined && allScores[i] > thisBest) {
+                    thisBest = allScores[i];
                     winnerNumber = i + 1;
                 }
             }
@@ -151,10 +151,10 @@ namespace info {
         //If not working in seconds, go with highest score
         if (winStyle !== winTypes.Seconds) {
             // If highest score is higher than saved high, replace
-            if (thisHigh > highScore) {
+            if (thisBest > bestScore) {
                 newBest = true;
-                highScore = thisHigh;
-                info.setScore(thisHigh);
+                bestScore = thisBest;
+                info.setScore(thisBest);
                 info.saveHighScore();
             } 
 
@@ -162,15 +162,15 @@ namespace info {
         } else {  
 
             // For this mode, overwrite score with time elapsed
-            thisHigh = Math.floor(game.runtime() / 1000);  // Score doesn't seem to accept decimals
-            info.setScore(thisHigh);
+            thisBest = Math.floor(game.runtime() / 1000);  // Score doesn't seem to accept decimals
+            info.setScore(thisBest);
 
 
             // Best time is least # of seconds in this mode
-            if (thisHigh < highScore || highScore <= 0) {
+            if (thisBest < bestScore || bestScore <= 0) {
                 newBest = true;
-                highScore = thisHigh;
-                settings.writeNumber("high-score", thisHigh);
+                bestScore = thisBest;
+                settings.writeNumber("high-score", thisBest);
             }
         
         }
@@ -188,7 +188,7 @@ namespace info {
 
         pause(400);
 
-        const overDialog = new GameOverDialog(true, thisHigh, highScore, newBest, winnerNumber, winStyle, timeElapsed, message);
+        const overDialog = new GameOverDialog(true, thisBest, bestScore, newBest, winnerNumber, winStyle, timeElapsed, message);
         scene.createRenderable(scene.HUD_Z, target => {
             overDialog.update();
             target.drawTransparentImage(
@@ -224,13 +224,13 @@ namespace info {
 
     export class GameOverDialog extends game.BaseDialog {
         protected cursorOn: boolean;
-        protected isNewHighScore: boolean;
+        protected isNewbestScore: boolean;
 
         constructor(
             protected win: boolean,
             protected score?: number,
-            protected highScore?: number,
-            protected newHighScore?: boolean,
+            protected bestScore?: number,
+            protected newbestScore?: boolean,
             protected winnerNum?: number,
             protected winStyle?: winTypes,
             protected numSeconds?: number,
@@ -244,7 +244,7 @@ namespace info {
             this.cursorOn = false;
             
             /* Since best time is lower, need to do this elsewhere
-            this.isNewHighScore = this.score > this.highScore;
+            this.isNewbestScore = this.score > this.bestScore;
             */
         }
 
@@ -313,7 +313,7 @@ namespace info {
 
             if (this.score !== undefined) {
                 const scoreHeight = 23;
-                const highScoreHeight = 34;
+                const bestScoreHeight = 34;
                 const scoreColor = screen.isMono ? 1 : 2;
 
                 this.image.printCenter(
@@ -323,17 +323,17 @@ namespace info {
                     image.font8
                 );
 
-                if (this.newHighScore == true) {
+                if (this.newbestScore == true) {
                     this.image.printCenter(
                         "New Best Score!",
-                        highScoreHeight,
+                        bestScoreHeight,
                         scoreColor,
                         image.font5
                     );
                 } else {
                     this.image.printCenter(
-                        "Best:" + this.highScore,
-                        highScoreHeight,
+                        "Best:" + this.bestScore,
+                        bestScoreHeight,
                         scoreColor,
                         image.font8
                     );
