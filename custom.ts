@@ -108,7 +108,7 @@ namespace info {
 
     }
 
-    export function newGameOver(winStyle: winTypes, fanfare: effects.BackgroundEffect) {
+    export function newGameOver(winStyle: winTypes, fanfare: effects.BackgroundEffect, message?:string) {
 
         // Prep default variables for different win types
         let winnerNumber = 1;
@@ -188,7 +188,7 @@ namespace info {
 
         pause(400);
 
-        const overDialog = new GameOverDialog(true, thisHigh, highScore, newBest, winnerNumber, winStyle, timeElapsed);
+        const overDialog = new GameOverDialog(true, thisHigh, highScore, newBest, winnerNumber, winStyle, timeElapsed, message);
         scene.createRenderable(scene.HUD_Z, target => {
             overDialog.update();
             target.drawTransparentImage(
@@ -367,6 +367,23 @@ namespace game {
         } else {
             info.newGameOver(winStyle, winEffect);
         }
+    }
+
+    /**
+     * Adds additional end game styles
+     */
+    //% color="#8854d0"
+    //% group=Gameplay
+    //% blockId=on_game_over_expanded
+    //% block="game over message $message || add effect $winEffect"
+    //% message.defl="Game Over"
+    //% winEffect.defl=effects.confetti
+    //% inlineInputMode=inline
+    export function customGameOverExpanded(message: string, winEffect?: effects.BackgroundEffect) {
+        if (!winEffect) {
+            winEffect = effects.confetti;
+        }
+            info.newGameOver(winTypes.Custom, winEffect, message);
     }
 }
 
