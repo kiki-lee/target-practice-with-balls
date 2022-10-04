@@ -15,10 +15,12 @@ enum winTypes {
     Lose,
     //% block="high score"
     Score,
+     //% block="seconds passed"
+    Seconds,
     //% block="multiplayer"
     Multi,
-     //% block="seconds passed"
-    Seconds
+    //% block="custom"
+    Custom
 }
 
 enum speeds {
@@ -118,44 +120,51 @@ namespace info {
         // Save number of seconds passed during game
         const timeElapsed = game.runtime();
 
+        /*
         // Save all scores as relevant to the game.
-        //info.saveAllScores();
+        info.saveAllScores();
+        */
 
-        // collect the scores before popping the scenes
+        //Save player 1 score, no matter what
         const scoreInfo1 = info.player1.getState();
-        const scoreInfo2 = info.player2.getState();
-        const scoreInfo3 = info.player3.getState();
-        const scoreInfo4 = info.player4.getState();
-        const allScores = [scoreInfo1.score, scoreInfo2.score, scoreInfo3.score, scoreInfo4.score];
+        info.setScore(scoreInfo1.score);
+        thisHigh = scoreInfo1.score;
+
+        // Save other player's scores if it matters
+        if (winStyle !== winTypes.Multi) {
+            // collect the scores before popping the scenes
+            const scoreInfo2 = info.player2.getState();
+            const scoreInfo3 = info.player3.getState();
+            const scoreInfo4 = info.player4.getState();
+            const allScores = [scoreInfo1.score, scoreInfo2.score, scoreInfo3.score, scoreInfo4.score];
 
 
-        // Find player with highest score in Multi
-        for (let i = 0; i < 4; i++) {
-            if (allScores[i] > thisHigh) {
-                thisHigh = allScores[i];
-                winnerNumber = i + 1;
+            // Find player with highest score in Multi
+            for (let i = 0; i < 4; i++) {
+                if (allScores[i] !== undefined && allScores[i] > thisHigh) {
+                    thisHigh = allScores[i];
+                    winnerNumber = i + 1;
+                }
             }
         }
 
-        //Check if working with seconds or points
+        //If not working in seconds, go with highest score
         if (winStyle !== winTypes.Seconds) {
             // If highest score is higher than saved high, replace
             if (thisHigh > highScore) {
                 newBest = true;
                 highScore = thisHigh;
-                info.saveHighScore();
                 info.setScore(thisHigh);
+                info.saveHighScore();
             } 
-        } else {  // Best time for Seconds mode
+
+        // If working in seconds, lower is better
+        } else {  
 
             // For this mode, overwrite score with time elapsed
-            thisHigh = Math.floor(game.runtime() / 1000);
+            thisHigh = Math.floor(game.runtime() / 1000);  // Score doesn't seem to accept decimals
             info.setScore(thisHigh);
 
-            /*
-            // For time, highSore needs to be initialized high
-            if (highScore <= 0) { highScore = 1000000;} 
-            */
 
             // Best time is least # of seconds in this mode
             if (thisHigh < highScore || highScore <= 0) {
@@ -224,7 +233,8 @@ namespace info {
             protected newHighScore?: boolean,
             protected winnerNum?: number,
             protected winStyle?: winTypes,
-            protected numSeconds?: number
+            protected numSeconds?: number,
+            protected userText?: string
         ) {
             super(screen.width, 46, img`
         1 1 1
@@ -275,6 +285,21 @@ namespace info {
                         titleHeight,
                         screen.isMono ? 1 : 5,
                         image.font8
+                    );
+                }
+            } else if (this.winStyle == winTypes.Custom) {
+                if (this.numSeconds !== undefined) {
+                    this.image.printCenter(
+                        this.userText,
+                        titleHeight,
+                        screen.isMono ? 1 : 5,
+                        image.font8
+                    );
+                    this.image.printCenter(
+                        "Finished in " + this.score + " seconds!",
+                        titleHeight+10,
+                        screen.isMono ? 1 : 2,
+                        image.font5
                     );
                 }
             } else {
