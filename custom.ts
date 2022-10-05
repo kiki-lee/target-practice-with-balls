@@ -164,7 +164,7 @@ namespace info {
 
 
         // Initialize thisBest if customScore wasn't included
-        if (!customScore) {
+        if (customScore === undefined) {
             thisBest = info.player1.getState().score;
         }
 
@@ -205,10 +205,10 @@ namespace info {
             // Find player with highest score in Multi
             thisBest = -1000000; // Make sure there's no false tie
             for (let i = 0; i < 4; i++) {
-                if (allScores[i] !== undefined && allScores[i] > thisBest) {
+                if (allScores[i] != undefined && allScores[i] > thisBest) {
                     thisBest = allScores[i];
                     winnerNumber = [i+1];
-                } else if (allScores[i] !== undefined && allScores[i] == thisBest) {
+                } else if (allScores[i] != undefined && allScores[i] == thisBest) {
                     winnerNumber.push(i + 1);
                 }
             }
@@ -235,7 +235,7 @@ namespace info {
         }
 
         // Overwrite current game score if something was passed in
-        if (customScore !== undefined) {
+        if (customScore != undefined) {
             thisBest = customScore;
         }
 
@@ -382,7 +382,7 @@ namespace info {
             );
             
 
-            if (this.score !== undefined) {
+            if (this.score != undefined) {
                 const scoreHeight = 23;
                 const bestScoreHeight = 34;
                 const scoreColor = screen.isMono ? 1 : 2;
@@ -451,15 +451,11 @@ namespace game {
     //% winEffect.defl=effects.confetti
     //% inlineInputMode=inline
     export function customGameOverExpanded(message: string, winEffect?: effects.BackgroundEffect, scoring?: scoreTypes, score?: number) {
-        if (winEffect == undefined) { winEffect = effects.confetti; }
-        if (scoring == undefined) { scoring = scoreTypes.None; }
-        if (score == undefined) { 
-            info.player1.score(); 
-        } else { 
-            info.setScore(score); 
-        }
+        if (winEffect === undefined) { winEffect = effects.confetti; }
+        if (scoring === undefined) { scoring = scoreTypes.None; }
+        if (score === undefined) { info.score();} 
 
-        info.newGameOver(winTypes.Custom, winEffect, scoring, message);
+        info.newGameOver(winTypes.Custom, winEffect, scoring, message, score);
     }
 }
 

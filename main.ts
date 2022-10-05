@@ -3,7 +3,7 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     info.player3.setScore(20);
     info.player4.setScore(301);
     info.player1.setScore(301);
-    game.customGameOverExpanded("Hiya!", effects.confetti, scoreTypes.LScore, 3)
+    game.customGameOverExpanded("Hiya!", effects.confetti, scoreTypes.LScore, 100)
 
     //game.onGameOverExpanded(winTypes.Multi)
 })
