@@ -170,7 +170,7 @@ namespace info {
 
         // Initialize the messaging / fanfare based on winStyle
         if (winStyle == winTypes.Custom) {
-            if (!scoreType) { scoreType = scoreTypes.None;}
+            if (!scoreType) { scoreType = scoreTypes.HScore;}
             if (!message) { message = "Game Over!"; }
             if (!fanfare) { fanfare = effects.confetti; }
 
@@ -286,6 +286,12 @@ namespace info {
                 info.saveLowScore();
             }
 
+        } else {
+
+            // Score judging type must be "None"
+            thisBest = undefined;
+            bestScore = undefined;
+            newBest = false;
         }
 
 
@@ -452,7 +458,7 @@ namespace game {
     //% inlineInputMode=inline
     export function customGameOverExpanded(message: string, winEffect?: effects.BackgroundEffect, scoring?: scoreTypes, score?: number) {
         if (winEffect === undefined) { winEffect = effects.confetti; }
-        if (scoring === undefined) { scoring = scoreTypes.None; }
+        if (scoring === undefined) { scoring = scoreTypes.HScore; }
         if (score === undefined) { info.score();} 
 
         info.newGameOver(winTypes.Custom, winEffect, scoring, message, score);
@@ -492,17 +498,18 @@ namespace ball {
    * The sprite auto-destroys when it leaves the screen. You can modify position after it's created.
    */
     //% group="Projectiles"
-    //% blockId=spritescreateprojectileballfromsprite block="ball %img=screen_image_picker from %parentBall=variables_get(myBall)"
+    //% blockId=spritescreateprojectileballfromparent block="ball %img=screen_image_picker based on %parentBall=variables_get(myBall) || of kind %kind=spritekind"
     //% weight=99
-    //% blockSetVariable=projectile
+    //% blockSetVariable=throwBall
     //% inlineInputMode=inline
-    export function createProjectileBallFromSprite(img: Image, parentBall: Ball): Ball {
+    export function createProjectileBallFromSprite(img: Image, parentBall: Ball, kind?: number): Ball {
         let vx = ball.xComponent(parentBall.angle, parentBall.pow);
         let vy = ball.yComponent(parentBall.angle, parentBall.pow);
         let ay = parentBall.gravity;
         let ax = parentBall.wind;
         let p = parentBall.pow;
-        return createProjectileBall(img, vx, vy, ax, ay, p, SpriteKind.Projectile, parentBall);
+        if (!kind) { kind = SpriteKind.Projectile;}
+        return createProjectileBall(img, vx, vy, ax, ay, p, kind, parentBall);
     }
 
     /**
@@ -510,7 +517,7 @@ namespace ball {
      * The sprite auto-destroys when it leaves the screen. You can modify position after it's created.
      */
     //% group="Projectiles"
-    //% blockId=spritescreateprojectileball block="projectile %img=screen_image_picker vx %vx vy %vy of kind %kind=spritekind||from sprite %parentBall=variables_get(myBall)"
+    //% blockId=spritescreateprojectileball block="ball %img=screen_image_picker vx %vx vy %vy of kind %kind=spritekind||based on %parentBall=variables_get(myBall)"
     //% weight=99
     //% blockSetVariable=throwBall
     //% inlineInputMode=inline
@@ -694,7 +701,7 @@ class Ball extends sprites.ExtendableSprite {
     /**
      * Throw the throwable with the current settings
      */
-    //% blockId=throwIt block="ball %ball(myBall)"
+    //% blockId=throwIt block="toss %ball(myBall)"
     //% weight=50
     //% group="Actions"
     public throwIt(): void {
