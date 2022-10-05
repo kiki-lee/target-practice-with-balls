@@ -25,13 +25,15 @@ enum winTypes {
 
 enum scoreTypes {
     //% block="high score"
-    Win,
+    HScore,
     //% block="low score"
-    Lose,
+    LScore,
     //% block="high time"
-    Score,
+    HTime,
     //% block="low time"
-    Seconds
+    LTime,
+    //% block="none"
+    None
 }
 
 enum speeds {
@@ -119,31 +121,56 @@ namespace info {
 
     }
 
-    export function newGameOver(winStyle: winTypes, fanfare: effects.BackgroundEffect, message?: string, scoreType?: scoreTypes, customScore?: number) {
+    export function newGameOver(winStyle: winTypes, fanfare: effects.BackgroundEffect, scoreType?: scoreTypes, message?: string, customScore?: number) {
 
         // Prep default variables for different win types
-        let winnerNumber = 1;
-        let thisBest = 0;
-        let newBest = false;
-        let bestScore = 0;
-
+        let winnerNumber = [1];  // Which players have the high scores?
+        let thisBest = info.score(); // Who has the best score this round?
+        let newBest = false; // Is thisBest the newBest for all games?
+        let bestScore = info.highScore(); // What is the bestScore of all time?
 
         // Save number of seconds passed during game
-        const timeElapsed = game.runtime();
+        const timeElapsed = Math.floor(game.runtime() / 1000);  // Score doesn't seem to accept decimals
 
         /*
         // Save all scores as relevant to the game.
-        info.saveAllScores();
+            info.saveAllScores(); // This is throwing an error for some reason
         */
 
-        //Save player 1 score, no matter what
-        const scoreInfo1 = info.player1.getState();
-        info.setScore(scoreInfo1.score);
-        thisBest = scoreInfo1.score;
 
-        // Save other player's scores if it matters
-        if (winStyle !== winTypes.Multi) {
-            // collect the scores before popping the scenes
+        // Initialize customScore if one wasn't included
+        if (!customScore) {
+            thisBest = info.player1.getState().score;
+        }
+
+        // Initialize the messaging / fanfare based on winStyle
+        if (winStyle == winTypes.Custom) {
+            if (!scoreType) { scoreType = scoreTypes.None;}
+            if (!message) { message = "Game Over!" }
+            if (!fanfare) { fanfare = effects.confetti }
+            thisBest = customScore;
+
+        } else if (winStyle == winTypes.Win) {
+            scoreType = scoreTypes.HScore;
+            if (!message) { message = "You Win!" }
+            if (!fanfare) { fanfare = effects.confetti }
+
+        } else if (winStyle == winTypes.Score) {
+            scoreType = scoreTypes.HScore;
+            if (!message) { message = "Great Job!" }
+            if (!fanfare) { fanfare = effects.confetti }
+
+        } else if (winStyle == winTypes.Timed) {
+            scoreType = scoreTypes.LTime;
+            if (!message) { message = "Great Job!" }
+            if (!fanfare) { fanfare = effects.confetti }
+
+        } else if (winStyle == winTypes.Multi) {
+            scoreType = scoreTypes.HScore;
+            if (!fanfare) { fanfare = effects.confetti }
+
+            // Find winner of multiplayer
+            const scoreInfo1 = info.player1.getState();
             const scoreInfo2 = info.player2.getState();
             const scoreInfo3 = info.player3.getState();
             const scoreInfo4 = info.player4.getState();
@@ -151,17 +178,44 @@ namespace info {
 
 
             // Find player with highest score in Multi
+            thisBest = -1000000; // Make sure there's no false tie
             for (let i = 0; i < 4; i++) {
                 if (allScores[i] !== undefined && allScores[i] > thisBest) {
                     thisBest = allScores[i];
-                    winnerNumber = i + 1;
+                    winnerNumber = [i+1];
+                } else if (allScores[i] !== undefined && allScores[i] == thisBest) {
+                    winnerNumber.push(i + 1);
                 }
             }
+
+            // Construct string for one winner
+            if (!message && winnerNumber.length <= 1) { 
+                message = "Player " + winnerNumber[0] + " Wins!" ;
+            } else {
+                //Construct string for ties
+                message = "Players ";
+
+                for (let i = 0; i < ((winnerNumber.length)-1); i++) {
+                    message += winnerNumber[i] + " & ";
+                }
+
+                // remove the last ampersand and the trailing space
+                message += winnerNumber[(winnerNumber.length) - 1] + " Tied!";
+            }
+
+        } else {
+            if (!scoreType) { scoreType = scoreTypes.None;}
+            if (!message) { message = "Game Over!"; }
+            if (!fanfare) { fanfare = effects.melt; }
         }
 
-        //If not working in seconds, go with highest score
-        if (winStyle !== winTypes.Timed) {
-            // If highest score is higher than saved high, replace
+        // Overwrite current score with whatever was passed in
+        if (customScore !== undefined) {
+            thisBest = customScore;
+        }
+
+        // Set bestScore and newBest based on score and scoreType
+        if (scoreType == scoreTypes.HScore){
             if (thisBest > bestScore) {
                 newBest = true;
                 bestScore = thisBest;
@@ -169,19 +223,30 @@ namespace info {
                 info.saveHighScore();
             }
 
-            // If working in seconds, lower is better
-        } else {
-
-            // For this mode, overwrite score with time elapsed
-            thisBest = Math.floor(game.runtime() / 1000);  // Score doesn't seem to accept decimals
-            info.setScore(thisBest);
-
-
-            // Best time is least # of seconds in this mode
-            if (thisBest < bestScore || bestScore <= 0) {
+        } else if (scoreType == scoreTypes.LScore) {
+            if (thisBest < bestScore) {
                 newBest = true;
                 bestScore = thisBest;
-                settings.writeNumber("high-score", thisBest);
+                info.setScore(thisBest);
+                info.saveHighScore();
+            }
+
+        } else if (scoreType == scoreTypes.HTime) {
+            thisBest = timeElapsed;
+            if (thisBest > bestScore) {
+                newBest = true;
+                bestScore = thisBest;
+                info.setScore(thisBest);
+                info.saveHighScore();
+            }
+
+        } else if (scoreType == scoreTypes.LTime) {
+            thisBest = timeElapsed;
+            if (thisBest < bestScore) {
+                newBest = true;
+                bestScore = thisBest;
+                info.setScore(thisBest);
+                info.saveHighScore();
             }
 
         }
@@ -340,20 +405,26 @@ namespace game {
     }
 
     /**
-     * Adds additional end game styles
+     * Adds custom end game styles
      */
     //% color="#8854d0"
     //% group=Gameplay
     //% blockId=on_game_over_custom_expanded
-    //% block="game over message $message || add effect $winEffect"
-    //% message.defl="Game Over"
+    //% block="game over $message || send score $score judge $scoring add $winEffect"
+    //% message.defl="Great Job!"
+    //% scoring.defl=scoreTypes.None
     //% winEffect.defl=effects.confetti
     //% inlineInputMode=inline
-    export function customGameOverExpanded(message: string, winEffect?: effects.BackgroundEffect) {
-        if (!winEffect) {
-            winEffect = effects.confetti;
+    export function customGameOverExpanded(message: string, winEffect?: effects.BackgroundEffect, scoring?: scoreTypes, score?: number) {
+        if (!winEffect) { winEffect = effects.confetti; }
+        if (!scoring) { scoring = scoreTypes.None; }
+        if (!score) { 
+            info.player1.score(); 
+        } else { 
+            info.setScore(score); 
         }
-        info.newGameOver(winTypes.Custom, winEffect, message);
+
+        info.newGameOver(winTypes.Custom, winEffect, scoring, message);
     }
 }
 

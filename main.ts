@@ -1,5 +1,10 @@
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    game.onGameOverExpanded(winTypes.Seconds)
+    info.player2.setScore(5);
+    info.player3.setScore(5);
+    info.player4.setScore(5);
+    info.player1.setScore(5);
+
+    game.onGameOverExpanded(winTypes.Multi)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     let throwBall = ball.createProjectileBallFromSprite(assets.image`ball0`, myBall)
@@ -28,6 +33,7 @@ myBall.setPosition(80, 90)
 myBall.controlWithArrowKeys(true)
 let myBooth = sprites.create(assets.image`boundaries`, SpriteKind.Booth)
 myBooth.z = 100
+info.player2.setScore(5);
 info.startCountdownGame(20, winTypes.Score)
 myBall.setTrace(false)
 forever(function () {
