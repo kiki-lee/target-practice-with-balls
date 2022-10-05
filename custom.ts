@@ -116,8 +116,9 @@ namespace info {
             winEffect = effects.confetti;
         }
         else { winEffect = effects.melt; }
+
         init(winType, winEffect);
-        info.startCountdown(myTime)
+        info.startCountdown(myTime);
 
     }
 
@@ -146,28 +147,28 @@ namespace info {
         // Initialize the messaging / fanfare based on winStyle
         if (winStyle == winTypes.Custom) {
             if (!scoreType) { scoreType = scoreTypes.None;}
-            if (!message) { message = "Game Over!" }
-            if (!fanfare) { fanfare = effects.confetti }
+            if (!message) { message = "Game Over!"; }
+            if (!fanfare) { fanfare = effects.confetti; }
             thisBest = customScore;
 
         } else if (winStyle == winTypes.Win) {
             scoreType = scoreTypes.HScore;
-            if (!message) { message = "You Win!" }
-            if (!fanfare) { fanfare = effects.confetti }
+            message = "You Win!";
+            if (!fanfare) { fanfare = effects.confetti; }
 
         } else if (winStyle == winTypes.Score) {
             scoreType = scoreTypes.HScore;
-            if (!message) { message = "Great Job!" }
-            if (!fanfare) { fanfare = effects.confetti }
+            message = "Great Score!" ;
+            if (!fanfare) { fanfare = effects.confetti; }
 
         } else if (winStyle == winTypes.Timed) {
             scoreType = scoreTypes.LTime;
-            if (!message) { message = "Great Job!" }
-            if (!fanfare) { fanfare = effects.confetti }
+            message = "Great Time!" ;
+            if (!fanfare) { fanfare = effects.confetti; }
 
         } else if (winStyle == winTypes.Multi) {
             scoreType = scoreTypes.HScore;
-            if (!fanfare) { fanfare = effects.confetti }
+            if (!fanfare) { fanfare = effects.confetti; }
 
             // Find winner of multiplayer
             const scoreInfo1 = info.player1.getState();

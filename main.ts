@@ -1,10 +1,10 @@
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     info.player2.setScore(5);
-    info.player3.setScore(5);
+    info.player3.setScore(20);
     info.player4.setScore(5);
-    info.player1.setScore(5);
+    info.player1.setScore(30);
 
-    game.onGameOverExpanded(winTypes.Multi)
+    game.onGameOverExpanded(winTypes.Win)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     let throwBall = ball.createProjectileBallFromSprite(assets.image`ball0`, myBall)
