@@ -163,7 +163,7 @@ namespace info {
         */
 
 
-        // Initialize customScore if one wasn't included
+        // Initialize thisBest if customScore wasn't included
         if (!customScore) {
             thisBest = info.player1.getState().score;
         }
@@ -173,7 +173,7 @@ namespace info {
             if (!scoreType) { scoreType = scoreTypes.None;}
             if (!message) { message = "Game Over!"; }
             if (!fanfare) { fanfare = effects.confetti; }
-            thisBest = customScore;
+
 
         } else if (winStyle == winTypes.Win) {
             scoreType = scoreTypes.HScore;
@@ -234,7 +234,7 @@ namespace info {
             if (!fanfare) { fanfare = effects.melt; }
         }
 
-        // Overwrite current score with whatever was passed in
+        // Overwrite current game score if something was passed in
         if (customScore !== undefined) {
             thisBest = customScore;
         }
@@ -254,11 +254,16 @@ namespace info {
                 newBest = true;
                 bestScore = thisBest;
                 info.setScore(thisBest);
-                info.saveHighScore();
+                info.saveLowScore();
             }
 
         } else if (scoreType == scoreTypes.HTime) {
-            thisBest = timeElapsed;
+
+            // Set thisBest to timeElapsed if no customScore 
+            if (!customScore) {
+                thisBest = timeElapsed;
+            }
+
             if (thisBest > bestScore) {
                 newBest = true;
                 bestScore = thisBest;
@@ -268,12 +273,17 @@ namespace info {
 
         } else if (scoreType == scoreTypes.LTime) {
             bestScore = info.lowScore();
-            thisBest = timeElapsed;
+
+            // Set thisBest to timeElapsed if no customScore 
+            if (!customScore) {
+                thisBest = timeElapsed;
+            }
+
             if (thisBest < bestScore) {
                 newBest = true;
                 bestScore = thisBest;
                 info.setScore(thisBest);
-                info.saveHighScore();
+                info.saveLowScore();
             }
 
         }
