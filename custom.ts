@@ -390,13 +390,11 @@ namespace game {
     //% winEffect.defl=effects.confetti
     //% inlineInputMode=inline
     export function onGameOverExpanded(winStyle: winTypes, winEffect?: effects.BackgroundEffect) {
-        if (!winStyle)
-            winStyle = winTypes.Score;
-        if (!winEffect) {
+
+        if (winEffect == undefined) {
             if (winStyle == winTypes.Lose) { winEffect = effects.melt; }
             else { winEffect = effects.confetti; }
         }
-
 
         if (winStyle == winTypes.Lose) {
             game.over(false, winEffect)
@@ -417,9 +415,9 @@ namespace game {
     //% winEffect.defl=effects.confetti
     //% inlineInputMode=inline
     export function customGameOverExpanded(message: string, winEffect?: effects.BackgroundEffect, scoring?: scoreTypes, score?: number) {
-        if (!winEffect) { winEffect = effects.confetti; }
-        if (!scoring) { scoring = scoreTypes.None; }
-        if (!score) { 
+        if (winEffect == undefined) { winEffect = effects.confetti; }
+        if (scoring == undefined) { scoring = scoreTypes.None; }
+        if (score == undefined) { 
             info.player1.score(); 
         } else { 
             info.setScore(score); 

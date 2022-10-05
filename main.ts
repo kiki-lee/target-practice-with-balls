@@ -2,13 +2,13 @@ controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     info.player2.setScore(5);
     info.player3.setScore(20);
     info.player4.setScore(5);
-    info.player1.setScore(30);
+    info.player1.setScore(300);
 
-    game.onGameOverExpanded(winTypes.Win)
+    game.onGameOverExpanded(winTypes.Timed)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     let throwBall = ball.createProjectileBallFromSprite(assets.image`ball0`, myBall)
-    throwBall.setTrace()
+    throwBall.setTrace();
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Booth, function (sprite, otherSprite) {
     info.changeScoreBy(-1)
