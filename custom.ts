@@ -69,6 +69,8 @@ let textSprite: TextSprite = null
 //let fanfare: effects.BackgroundEffect = undefined;
 //let winStyle = winTypes.Score
 
+// Get array of player info
+let players: info.PlayerInfo[];
 
 
 namespace scene {
@@ -120,6 +122,28 @@ namespace info {
         init(winType, winEffect);
         info.startCountdown(myTime);
 
+    }
+
+    export function saveLowScore() {
+        if (players) {
+            let ls = 0;
+            players
+                .filter(p => p && p.hasScore())
+                .forEach(p => ls = Math.min(ls, p.score()));
+            const curr = settings.readNumber("low-score")
+            if (curr == null || ls < curr)
+                settings.writeNumber("low-score", ls);
+        }
+    }
+
+    /**
+ * Get the last recorded low score
+ */
+    //% weight=94
+    //% blockId=lowScore block="low score"
+    //% group="Score"
+    export function lowScore(): number {
+        return settings.readNumber("low-score") || 1000;
     }
 
     export function newGameOver(winStyle: winTypes, fanfare: effects.BackgroundEffect, scoreType?: scoreTypes, message?: string, customScore?: number) {
@@ -225,6 +249,7 @@ namespace info {
             }
 
         } else if (scoreType == scoreTypes.LScore) {
+            bestScore = info.lowScore();
             if (thisBest < bestScore) {
                 newBest = true;
                 bestScore = thisBest;
@@ -242,6 +267,7 @@ namespace info {
             }
 
         } else if (scoreType == scoreTypes.LTime) {
+            bestScore = info.lowScore();
             thisBest = timeElapsed;
             if (thisBest < bestScore) {
                 newBest = true;
