@@ -93,7 +93,7 @@ namespace scene {
     //% myPosition.defl=areas.Bottom
     //% inlineInputMode=inline
     export function add_label_to(myLabel: string, myPosition: areas, myColor?: number) {
-        if (!myColor)
+        if (myColor == undefined)
             myColor = 4;
 
         textSprite = textsprite.create(myLabel, 0, myColor)
@@ -307,7 +307,7 @@ namespace info {
         game.pushScene();
         scene.setBackgroundImage(screen.clone());
 
-        music.powerUp.play();
+        game.customSound.play();
 
         fanfare.startScreenEffect();
 
@@ -427,6 +427,9 @@ namespace info {
 }
 
 namespace game {
+
+    export let customSound: music.Melody = undefined;
+
     /**
      * Adds additional end game styles
      */
@@ -466,10 +469,10 @@ namespace game {
     export function customGameOverExpanded(message: string, winEffect?: effects.BackgroundEffect, gameSound?: music.Melody, scoring?: scoreTypes, score?: number) {
         if (!winEffect) { winEffect = effects.confetti; }
         if (!scoring) { scoring = scoreTypes.HScore; }
-        if (!score) { info.score();} 
+        if (score == undefined) { info.score();} 
         if (!gameSound) { gameSound = music.powerUp;}
-        setGameOverSound(true, gameSound);
-
+        customSound = gameSound;
+        game.setGameOverSound(true, gameSound);
 
         info.newGameOver(winTypes.Custom, winEffect, scoring, message, score);
     }
@@ -488,7 +491,7 @@ namespace ball {
      * @param x optional initial x position, eg: 10
      * @param y optional initial y position, eg: 110
      */
-    //% blockId=throwCreate block="ball %img=screen_image_picker of kind %kind=spritekind || at x %x y %y"
+    //% blockId=throwCreate block="ball $img=screen_image_picker of kind $kind=spritekind || at x $x y $y"
     //% expandableArgumentMode=toggle
     //% inlineInputMode=inline
     //% blockSetVariable=myBall
@@ -508,7 +511,7 @@ namespace ball {
    * The sprite auto-destroys when it leaves the screen. You can modify position after it's created.
    */
     //% group="Projectiles"
-    //% blockId=spritescreateprojectileballfromparent block="ball %img=screen_image_picker based on %parentBall=variables_get(myBall) || of kind %kind=spritekind"
+    //% blockId=spritescreateprojectileballfromparent block="ball $img=screen_image_picker based on $parentBall=variables_get(myBall) || of kind $kind=spritekind"
     //% weight=99
     //% blockSetVariable=throwBall
     //% inlineInputMode=inline
@@ -527,7 +530,7 @@ namespace ball {
      * The sprite auto-destroys when it leaves the screen. You can modify position after it's created.
      */
     //% group="Projectiles"
-    //% blockId=spritescreateprojectileball block="ball %img=screen_image_picker vx %vx vy %vy of kind %kind=spritekind||based on %parentBall=variables_get(myBall)"
+    //% blockId=spritescreateprojectileball block="ball $img=screen_image_picker vx $vx vy $vy of kind $kind=spritekind||based on $parentBall=variables_get(myBall)"
     //% weight=99
     //% blockSetVariable=throwBall
     //% inlineInputMode=inline
@@ -699,7 +702,7 @@ class Ball extends sprites.ExtendableSprite {
      * Gets the throwables's sprite
      */
     //% group="Properties"
-    //% blockId=throwSprite block="%ball(myBall) sprite"
+    //% blockId=throwSprite block="$this sprite"
     //% weight=8
     get sprite(): Sprite {
         return this;
@@ -709,10 +712,10 @@ class Ball extends sprites.ExtendableSprite {
      * Set how to show the trace for the estimated path
      * @param on whether to turn on or off this feature, eg: true
      */
-    //% blockId=setTrace block="trace %ball(myBall) path estimate %traceWay=tracers.Full"
+    //% blockId=setTraceMulti block="trace &this path estimate $traceWay=tracers.Full"
     //% weight=50
     //% group="Actions"
-    public setTrace(ball:Ball, traceWay: tracers): void {
+    public setTraceMulti(traceWay: tracers): void {
          
         if(traceWay == tracers.Full){
             this.moon.setFlag(SpriteFlag.Invisible, true);
@@ -724,7 +727,7 @@ class Ball extends sprites.ExtendableSprite {
             this.trace = true;
         } else if (traceWay == tracers.Pointer) {
             this.moon.setFlag(SpriteFlag.Invisible, true);
-            this.iter = .3;
+            this.iter = .2;
             this.trace = true;
         } else if (traceWay == tracers.Cross) {
             this.trace = false;
@@ -735,11 +738,21 @@ class Ball extends sprites.ExtendableSprite {
         }
     }
 
-    public update_crosshair() {
+
+    /**
+     * Set the crosshairs to distance away from center of 
+     * ball in direction ball will travel
+     */
+    //% blockId=updatecross block="update crosshairs || using distance $dist "
+    //% weight=50
+    //% group="Actions"
+    //% dist.defn = 3
+    public update_crosshair(dist?:number) {
+    if(dist == undefined) {dist = 3;}
     spriteutils.placeAngleFrom(
         this.moon,
         this.angle * Math.PI / -180,
-        20,
+        Math.max(this.width + dist, this.height + dist),
         this
     )
 }
@@ -747,18 +760,19 @@ class Ball extends sprites.ExtendableSprite {
     /**
      * Set the trace length for the estimated path in percent
      */
-    //% blockId=setTrace block="trace length %len percent for %ball(myBall)"
+    //% blockId=setIter block="set $this trace length to $len percent"
     //% weight=50
     //% group="Actions"
     //% len.defn = 50
     public setIter(len: number): void {
-        this.iter = 100/len;
+        // Make 100 percent distance = 3
+        this.iter = 3 * (len/100);
     }
 
     /**
      * Throw the throwable with the current settings
      */
-    //% blockId=throwIt block="toss %ball(myBall)"
+    //% blockId=throwIt block="toss $ball(myBall)"
     //% weight=50
     //% group="Actions"
     public throwIt(): void {
@@ -771,7 +785,7 @@ class Ball extends sprites.ExtendableSprite {
     /**
      * Stop the throwable at the current location
      */
-    //% blockId=stopIt block="stop %ball(myBall)"
+    //% blockId=stopIt block="stop $this"
     //% weight=50
     //% group="Actions"
     public stopIt(): void {
@@ -786,7 +800,7 @@ class Ball extends sprites.ExtendableSprite {
      * to adjust the angle, and up and down to increase / decrease power
      * @param on whether to turn on or off this feature, eg: true
      */
-    //% blockId=controlKeys block="control %ball(myBall) with arrow keys || %on=toggleOnOff"
+    //% blockId=controlKeys block="control $this with arrow keys || $on=toggleOnOff"
     //% weight=50
     //% group="Actions"
     public controlWithArrowKeys(on: boolean = true): void {
@@ -808,7 +822,7 @@ class Ball extends sprites.ExtendableSprite {
     /**
      * NO LONGER NECESSARY as this uses renderables now to draw onto the background.
      */
-    //% blockId=updateBackground block="change %ball(myBall) background to image %img=background_image_picker"
+    //% blockId=updateBackground block="change $this background to image $img=background_image_picker"
     //% weight=15
     //% group="Properties"
     //% deprecated=true

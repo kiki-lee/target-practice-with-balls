@@ -1,4 +1,3 @@
-
 function throw_power() {
     statusbar = statusbars.create(120, 6, StatusBarKind.Health)
     statusbar.setColor(5, 10)
@@ -7,7 +6,7 @@ function throw_power() {
 }
 // game.onGameOverExpanded(winTypes.Multi)
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    game.customGameOverExpanded("Great Job!", effects.confetti, music.powerUp, scoreTypes.HScore)
+    game.customGameOverExpanded("Spooky!", effects.confetti, music.spooky, scoreTypes.HScore)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     throwBall = ball.createProjectileBallFromSprite(assets.image`ball-blue`, myBall)
@@ -33,7 +32,7 @@ myBall = ball.create(assets.image`ball-yellow`, SpriteKind.Player)
 myBall.setPosition(80, 90)
 myBall.controlWithArrowKeys(true)
 let myBooth = sprites.create(assets.image`booth`, SpriteKind.Booth)
-myBall.setTrace(myBall, tracers.Cross)
+myBall.setTraceMulti(tracers.Cross)
 info.startCountdownGame(20, winTypes.Score)
 throw_power()
 myBall.setIter(10)
