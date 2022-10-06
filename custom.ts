@@ -712,15 +712,15 @@ class Ball extends sprites.ExtendableSprite {
          
         if(traceWay == tracers.Full){
             this.moon.setFlag(SpriteFlag.Invisible, true);
-            myBall.iter = 3;
+            this.iter = 3;
             this.trace = true;
         } else if (traceWay == tracers.Part) {
             this.moon.setFlag(SpriteFlag.Invisible, true);
-            myBall.iter = .3;
+            this.iter = .3;
             this.trace = true;
         } else if (traceWay == tracers.Pointer) {
             this.moon.setFlag(SpriteFlag.Invisible, true);
-            myBall.iter = .3;
+            this.iter = .3;
             this.trace = true;
         } else if (traceWay == tracers.Cross) {
             this.trace = false;

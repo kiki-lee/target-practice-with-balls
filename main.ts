@@ -1,4 +1,5 @@
-function throw_power () {
+
+function throw_power() {
     statusbar = statusbars.create(120, 6, StatusBarKind.Health)
     statusbar.setColor(5, 10)
     statusbar.setBarBorder(1, 1)
@@ -6,7 +7,7 @@ function throw_power () {
 }
 // game.onGameOverExpanded(winTypes.Multi)
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    game.customGameOverExpanded("Great Job!", effects.confetti, scoreTypes.None)
+    game.customGameOverExpanded("Great Job!", effects.confetti, scoreTypes.HScore)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     throwBall = ball.createProjectileBallFromSprite(assets.image`ball-blue`, myBall)
@@ -47,3 +48,4 @@ forever(function () {
     theTarget.setKind(SpriteKind.Enemy)
     pause(randint(500, 2000))
 })
+
