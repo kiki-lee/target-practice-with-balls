@@ -457,15 +457,19 @@ namespace game {
     //% color="#8854d0"
     //% group=Gameplay
     //% blockId=on_game_over_custom_expanded
-    //% block="game over $message || send score $score judge $scoring add $winEffect"
+    //% block="game over $message || with $winEffect and $gameSound send score $score judge $scoring"
     //% message.defl="Great Job!"
     //% scoring.defl=scoreTypes.None
     //% winEffect.defl=effects.confetti
+    //% gameSound.defl=music.powerUp
     //% inlineInputMode=inline
-    export function customGameOverExpanded(message: string, winEffect?: effects.BackgroundEffect, scoring?: scoreTypes, score?: number) {
-        if (winEffect === undefined) { winEffect = effects.confetti; }
-        if (scoring === undefined) { scoring = scoreTypes.HScore; }
-        if (score === undefined) { info.score();} 
+    export function customGameOverExpanded(message: string, winEffect?: effects.BackgroundEffect, gameSound?: music.Melody, scoring?: scoreTypes, score?: number) {
+        if (!winEffect) { winEffect = effects.confetti; }
+        if (!scoring) { scoring = scoreTypes.HScore; }
+        if (!score) { info.score();} 
+        if (!gameSound) { gameSound = music.powerUp;}
+        setGameOverSound(true, gameSound);
+
 
         info.newGameOver(winTypes.Custom, winEffect, scoring, message, score);
     }

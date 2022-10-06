@@ -7,7 +7,7 @@ function throw_power() {
 }
 // game.onGameOverExpanded(winTypes.Multi)
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    game.customGameOverExpanded("Great Job!", effects.confetti, scoreTypes.HScore)
+    game.customGameOverExpanded("Great Job!", effects.confetti, music.powerUp, scoreTypes.HScore)
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     throwBall = ball.createProjectileBallFromSprite(assets.image`ball-blue`, myBall)
@@ -48,4 +48,3 @@ forever(function () {
     theTarget.setKind(SpriteKind.Enemy)
     pause(randint(500, 2000))
 })
-
