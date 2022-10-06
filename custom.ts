@@ -6,6 +6,10 @@ namespace SpriteKind {
     export const Booth = SpriteKind.create()
     //% isKind
     export const Mouse = SpriteKind.create()
+    //% isKind
+    export const Crosshair = SpriteKind.create()
+    //% isKind
+    export const Moon = SpriteKind.create()
 }
 
 enum winTypes {
@@ -57,10 +61,12 @@ enum areas {
 enum tracers {
     //% block="full"
     Full,
+    //% block="partial"
+    Part,
+    //% block="pointer"
+    Pointer,
     //% block="crosshair"
     Cross,
-    //% block="arrow"
-    Arrow,
     //% block="off"
     Off
 }
@@ -637,6 +643,11 @@ class Ball extends sprites.ExtendableSprite {
     //% blockCombine block="wind"
     //% weight=8
     public powerRate: number;
+    //% group="Properties" blockSetVariable="myBall"
+    //% blockCombine block="moon"
+    //% weight=8
+    public moon: Sprite;
+
 
     public constructor(img: Image,
         kind: number,
@@ -652,8 +663,9 @@ class Ball extends sprites.ExtendableSprite {
         this.angle = 10;
         this.angleRate = 1;
         this.powerRate = 1;
-        this.iter = 3;
+        this.iter = .4;
         this.wind = 0;
+        this.moon = sprites.create(assets.image`crosshair`, SpriteKind.Moon);
 
         this.renderable = scene.createRenderable(-0.5, (target, camera) => {
             let xComp = ball.xComponent(this.angle, this.pow);
@@ -688,14 +700,64 @@ class Ball extends sprites.ExtendableSprite {
     }
 
     /**
-     * Set whether to show the trace for the estimated path
+     * Set how to show the trace for the estimated path
      * @param on whether to turn on or off this feature, eg: true
      */
-    //% blockId=setTrace block="trace %ball(myBall) path estimate || %on=toggleOnOff"
+    //% blockId=setTrace block="trace %ball(myBall) path estimate %traceWay=tracers.Full"
     //% weight=50
     //% group="Actions"
-    public setTrace(on: boolean = true): void {
-        this.trace = on;
+    public setTrace(ball:Ball, traceWay: tracers): void {
+        let crossImg = sprites.create(img`
+            . 1 . . . . . 1 . 
+            1 2 1 . . . 1 2 1 
+            . 1 2 1 . 1 2 1 . 
+            . . 1 2 1 2 1 . . 
+            . . . 1 . 1 . . . 
+            . . 1 2 1 2 1 . . 
+            . 1 2 1 . 1 2 1 . 
+            1 2 1 . . . 1 2 1 
+            . 1 . . . . . 1 . 
+            `, SpriteKind.Crosshair)
+         
+        if(traceWay == tracers.Full){
+            crossImg.setFlag(SpriteFlag.Invisible, true);
+            myBall.iter = 3;
+            this.trace = true;
+        } else if (traceWay == tracers.Part) {
+            crossImg.setFlag(SpriteFlag.Invisible, true);
+            myBall.iter = .3;
+            this.trace = true;
+        } else if (traceWay == tracers.Pointer) {
+            crossImg.setFlag(SpriteFlag.Invisible, true);
+            myBall.iter = .3;
+            this.trace = true;
+        } else if (traceWay == tracers.Cross) {
+            this.trace = false;
+            crossImg.setFlag(SpriteFlag.Invisible, false);
+        } else {
+            this.trace = false;
+            crossImg.setFlag(SpriteFlag.Invisible, false);
+        }
+    }
+
+    public update_crosshair() {
+    spriteutils.placeAngleFrom(
+        crosshair,
+        this.angle * Math.PI / -180,
+        20,
+        this
+    )
+}
+
+    /**
+     * Set the trace length for the estimated path in percent
+     */
+    //% blockId=setTrace block="trace length %len percent for %ball(myBall)"
+    //% weight=50
+    //% group="Actions"
+    //% len.defn = 50
+    public setIter(len: number): void {
+        this.iter = 100/len;
     }
 
     /**
