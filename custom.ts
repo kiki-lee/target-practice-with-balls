@@ -564,6 +564,7 @@ namespace ball {
             s.setPosition(initialX, initialY);
         }
 
+        s.moon.destroy();
         s.flags |= sprites.Flag.AutoDestroy | sprites.Flag.DestroyOnWall;
 
         return s;
@@ -666,6 +667,7 @@ class Ball extends sprites.ExtendableSprite {
         this.iter = .4;
         this.wind = 0;
         this.moon = sprites.create(assets.image`crosshair`, SpriteKind.Moon);
+        this.moon.setFlag(SpriteFlag.Invisible, true);
 
         this.renderable = scene.createRenderable(-0.5, (target, camera) => {
             let xComp = ball.xComponent(this.angle, this.pow);
@@ -707,42 +709,31 @@ class Ball extends sprites.ExtendableSprite {
     //% weight=50
     //% group="Actions"
     public setTrace(ball:Ball, traceWay: tracers): void {
-        let crossImg = sprites.create(img`
-            . 1 . . . . . 1 . 
-            1 2 1 . . . 1 2 1 
-            . 1 2 1 . 1 2 1 . 
-            . . 1 2 1 2 1 . . 
-            . . . 1 . 1 . . . 
-            . . 1 2 1 2 1 . . 
-            . 1 2 1 . 1 2 1 . 
-            1 2 1 . . . 1 2 1 
-            . 1 . . . . . 1 . 
-            `, SpriteKind.Crosshair)
          
         if(traceWay == tracers.Full){
-            crossImg.setFlag(SpriteFlag.Invisible, true);
+            this.moon.setFlag(SpriteFlag.Invisible, true);
             myBall.iter = 3;
             this.trace = true;
         } else if (traceWay == tracers.Part) {
-            crossImg.setFlag(SpriteFlag.Invisible, true);
+            this.moon.setFlag(SpriteFlag.Invisible, true);
             myBall.iter = .3;
             this.trace = true;
         } else if (traceWay == tracers.Pointer) {
-            crossImg.setFlag(SpriteFlag.Invisible, true);
+            this.moon.setFlag(SpriteFlag.Invisible, true);
             myBall.iter = .3;
             this.trace = true;
         } else if (traceWay == tracers.Cross) {
             this.trace = false;
-            crossImg.setFlag(SpriteFlag.Invisible, false);
+            this.moon.setFlag(SpriteFlag.Invisible, false);
         } else {
             this.trace = false;
-            crossImg.setFlag(SpriteFlag.Invisible, false);
+            this.moon.setFlag(SpriteFlag.Invisible, false);
         }
     }
 
     public update_crosshair() {
     spriteutils.placeAngleFrom(
-        crosshair,
+        this.moon,
         this.angle * Math.PI / -180,
         20,
         this

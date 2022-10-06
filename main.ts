@@ -25,7 +25,6 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
 let theTarget: Sprite = null
 let throwBall: Ball = null
 let statusbar: StatusBarSprite = null
-let crosshair: Sprite = null
 let myBall: Ball = null
 scene.setBackgroundImage(assets.image`wildWest`)
 
@@ -33,7 +32,7 @@ myBall = ball.create(assets.image`ball-yellow`, SpriteKind.Player)
 myBall.setPosition(80, 90)
 myBall.controlWithArrowKeys(true)
 let myBooth = sprites.create(assets.image`booth`, SpriteKind.Booth)
-myBall.setTrace(myBall, tracers.Full)
+myBall.setTrace(myBall, tracers.Cross)
 info.startCountdownGame(20, winTypes.Score)
 throw_power()
 myBall.setIter(10)
