@@ -6,7 +6,11 @@ function throw_power() {
 }
 // game.onGameOverExpanded(winTypes.Multi)
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
-    game.customGameOverExpanded("Spooky!", effects.confetti, music.spooky, scoreTypes.HScore)
+    info.player2.setScore(0)
+    info.player1.setScore(10)
+    game.onGameOverExpanded(winTypes.Timed)
+    //game.customGameOverExpanded("Spooky!", effects.confetti, music.magicWand, scoreTypes.LTime, 200)
+
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     throwBall = ball.createProjectileBallFromSprite(assets.image`ball-blue`, myBall)

@@ -130,15 +130,10 @@ namespace info {
 
     }
 
-    export function saveLowScore() {
-        if (players) {
-            let ls = 0;
-            players
-                .filter(p => p && p.hasScore())
-                .forEach(p => ls = Math.min(ls, p.score()));
-            const curr = settings.readNumber("low-score")
-            if (curr == null || ls < curr)
-                settings.writeNumber("low-score", ls);
+    export function saveLowScore(newLow: number) {
+        const curr = settings.readNumber("low-score")
+        if (curr == undefined || newLow < curr){
+            settings.writeNumber("low-score", newLow);
         }
     }
 
@@ -149,10 +144,10 @@ namespace info {
     //% blockId=lowScore block="low score"
     //% group="Score"
     export function lowScore(): number {
-        return settings.readNumber("low-score") || 1000;
+        return settings.readNumber("low-score");
     }
 
-    export function newGameOver(winStyle: winTypes, fanfare: effects.BackgroundEffect, scoreType?: scoreTypes, message?: string, customScore?: number) {
+    export function newGameOver(winStyle: winTypes, fanfare: effects.BackgroundEffect, winSound?:music.Melody, scoreType?: scoreTypes, message?: string, customScore?: number) {
 
         // Prep default variables for different win types
         let winnerNumber = [1];  // Which players have the high scores?
@@ -209,7 +204,7 @@ namespace info {
 
 
             // Find player with highest score in Multi
-            thisBest = -1000000; // Make sure there's no false tie
+            thisBest = -Infinity; // Make sure there's no false tie
             for (let i = 0; i < 4; i++) {
                 if (allScores[i] != undefined && allScores[i] > thisBest) {
                     thisBest = allScores[i];
@@ -255,12 +250,13 @@ namespace info {
             }
 
         } else if (scoreType == scoreTypes.LScore) {
-            bestScore = info.lowScore();
+            bestScore = settings.readNumber("low-score");
+            if(bestScore == undefined){bestScore = Infinity;}
             if (thisBest < bestScore) {
                 newBest = true;
                 bestScore = thisBest;
                 info.setScore(thisBest);
-                info.saveLowScore();
+                info.saveLowScore(thisBest);
             }
 
         } else if (scoreType == scoreTypes.HTime) {
@@ -278,7 +274,8 @@ namespace info {
             }
 
         } else if (scoreType == scoreTypes.LTime) {
-            bestScore = info.lowScore();
+            bestScore = settings.readNumber("low-score");
+            if (bestScore == undefined) { bestScore = Infinity; }
 
             // Set thisBest to timeElapsed if no customScore 
             if (!customScore) {
@@ -289,7 +286,7 @@ namespace info {
                 newBest = true;
                 bestScore = thisBest;
                 info.setScore(thisBest);
-                info.saveLowScore();
+                info.saveLowScore(thisBest);
             }
 
         } else {
@@ -300,6 +297,8 @@ namespace info {
             newBest = false;
         }
 
+        // Make sure there's a sound to playe
+        if (! winSound){winSound = music.powerUp;}
 
         // releasing memory and clear fibers. Do not add anything that releases the fiber until background is set below,
         // or screen will be cleared on the new frame and will not appear as background in the game over screen.
@@ -307,7 +306,7 @@ namespace info {
         game.pushScene();
         scene.setBackgroundImage(screen.clone());
 
-        game.customSound.play();
+        winSound.play();
 
         fanfare.startScreenEffect();
 
@@ -428,7 +427,6 @@ namespace info {
 
 namespace game {
 
-    export let customSound: music.Melody = undefined;
 
     /**
      * Adds additional end game styles
@@ -471,10 +469,8 @@ namespace game {
         if (!scoring) { scoring = scoreTypes.HScore; }
         if (score == undefined) { info.score();} 
         if (!gameSound) { gameSound = music.powerUp;}
-        customSound = gameSound;
         game.setGameOverSound(true, gameSound);
-
-        info.newGameOver(winTypes.Custom, winEffect, scoring, message, score);
+        info.newGameOver(winTypes.Custom, winEffect, gameSound, scoring, message, score);
     }
 }
 
@@ -669,8 +665,8 @@ class Ball extends sprites.ExtendableSprite {
         this.gravity = 20;
         this.pow = 50;
         this.angle = 10;
-        this.angleRate = 1;
-        this.powerRate = 1;
+        this.angleRate = 3;
+        this.powerRate = 3;
         this.iter = .4;
         this.wind = 0;
         this.moon = sprites.create(assets.image`crosshair`, SpriteKind.Moon);
@@ -808,8 +804,8 @@ class Ball extends sprites.ExtendableSprite {
 
         game.onUpdate(() => {
             if (this.controlKeys) {
-                this.angle -= controller.dx() * this.angleRate / 5;
-                this.pow -= controller.dy() * this.powerRate / 5;
+                this.angle -= controller.dx() * this.angleRate / 2;
+                this.pow -= controller.dy() * this.powerRate / 2;
             }
         })
     }
