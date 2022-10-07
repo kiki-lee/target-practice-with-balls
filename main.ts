@@ -1,9 +1,4 @@
-function throw_power() {
-    statusbar = statusbars.create(120, 6, StatusBarKind.Health)
-    statusbar.setColor(5, 10)
-    statusbar.setBarBorder(1, 1)
-    statusbar.setPosition(80, 113)
-}
+
 // game.onGameOverExpanded(winTypes.Multi)
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     info.player2.setScore(0)
@@ -28,23 +23,22 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
 })
 let theTarget: Sprite = null
 let throwBall: Ball = null
-let statusbar: StatusBarSprite = null
 let myBall: Ball = null
 scene.setBackgroundImage(assets.image`wildWest`)
 
 myBall = ball.create(assets.image`ball-yellow`, SpriteKind.Player)
 myBall.setPosition(80, 90)
 myBall.controlWithArrowKeys(true)
+let statusbar = statusbars.create(120, 6, StatusBarKind.Health)
+statusbar.setColor(5, 10)
+statusbar.setBarBorder(1, 1)
+statusbar.setPosition(80, 113)
 let myBooth = sprites.create(assets.image`booth`, SpriteKind.Booth)
 myBall.setTraceMulti(tracers.Cross)
 info.startCountdownGame(20, winTypes.Score)
-throw_power()
 myBall.setIter(10)
-game.onUpdate(function () {
-    statusbar.value = 50 + Math.sin(game.runtime() / 300) * 50
-    myBall.pow = statusbar.value
-    myBall.update_crosshair()
-})
+myBall.variablePower(statusbar, 50, 100)
+
 forever(function () {
     theTarget = sprites.createProjectileFromSide(assets.image`target`, 50, 0)
     theTarget.bottom = 56

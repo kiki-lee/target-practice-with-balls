@@ -708,8 +708,9 @@ class Ball extends sprites.ExtendableSprite {
      * Set how to show the trace for the estimated path
      * @param on whether to turn on or off this feature, eg: true
      */
-    //% blockId=setTraceMulti block="trace &this path estimate $traceWay=tracers.Full"
+    //% blockId=setTraceMulti block="trace &this path estimate $traceWay"
     //% weight=50
+    //% traceWay.defn = tracers.Full
     //% group="Actions"
     public setTraceMulti(traceWay: tracers): void {
          
@@ -810,10 +811,29 @@ class Ball extends sprites.ExtendableSprite {
         })
     }
 
+    /**
+  * Set whether to control the throwable with the arrow keys; left and right
+  * to adjust the angle, and up and down to increase / decrease power
+  * @param on whether to turn on or off this feature, eg: true
+  */
+    //% blockId=variablePower block="set $this power variable on $status from $minNum=0 to $maxNum=100"
+    //% weight=50
+    //% group="Actions"
+    public variablePower(status: StatusBarSprite, minNum: number, maxNum: number): void {
+
+        game.onUpdate(() => {
+            status.value = minNum + (Math.sin(game.runtime() / 500) * (maxNum-minNum))
+            this.pow = status.value
+            this.update_crosshair()
+        })
+    }
+
+    /* Duplicate of sprite destroy?
     destroy(effect?: effects.ParticleEffect, duration?: number) {
         super.destroy(effect, duration);
         this.renderable.destroy();
     }
+    */
 
     /**
      * NO LONGER NECESSARY as this uses renderables now to draw onto the background.
