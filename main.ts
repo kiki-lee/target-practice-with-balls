@@ -1,11 +1,9 @@
-
 // game.onGameOverExpanded(winTypes.Multi)
+// game.customGameOverExpanded("Spooky!", effects.confetti, music.magicWand, scoreTypes.LTime, 200)
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     info.player2.setScore(0)
     info.player1.setScore(10)
     game.onGameOverExpanded(winTypes.Timed)
-    //game.customGameOverExpanded("Spooky!", effects.confetti, music.magicWand, scoreTypes.LTime, 200)
-
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     throwBall = ball.createProjectileBallFromSprite(assets.image`ball-blue`, myBall)
@@ -14,7 +12,6 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Booth, function (sprite, oth
     info.changeScoreBy(-1)
     sprite.destroy()
 })
-
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
     otherSprite.destroy()
     sprite.destroy()
@@ -25,7 +22,6 @@ let theTarget: Sprite = null
 let throwBall: Ball = null
 let myBall: Ball = null
 scene.setBackgroundImage(assets.image`wildWest`)
-
 myBall = ball.create(assets.image`ball-yellow`, SpriteKind.Player)
 myBall.setPosition(80, 90)
 myBall.controlWithArrowKeys(true)
@@ -34,11 +30,10 @@ statusbar.setColor(5, 10)
 statusbar.setBarBorder(1, 1)
 statusbar.setPosition(80, 113)
 let myBooth = sprites.create(assets.image`booth`, SpriteKind.Booth)
-myBall.setTraceMulti(tracers.Cross)
+tracers.Cross.setTraceMulti(tracers.Cross)
 info.startCountdownGame(20, winTypes.Score)
 myBall.setIter(10)
 myBall.variablePower(statusbar, 50, 100)
-
 forever(function () {
     theTarget = sprites.createProjectileFromSide(assets.image`target`, 50, 0)
     theTarget.bottom = 56

@@ -816,8 +816,10 @@ class Ball extends sprites.ExtendableSprite {
   * to adjust the angle, and up and down to increase / decrease power
   * @param on whether to turn on or off this feature, eg: true
   */
-    //% blockId=variablePower block="set $this power variable on $status from $minNum=0 to $maxNum=100"
+    //% blockId=variablePower block="set $this power variable on $status from $minNum to $maxNum"
     //% weight=50
+    //% minNum.defl = 50
+    //% maxNum.defl = 100
     //% group="Actions"
     public variablePower(status: StatusBarSprite, minNum: number, maxNum: number): void {
 
