@@ -3,7 +3,9 @@
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     info.player2.setScore(0)
     info.player1.setScore(10)
-    game.onGameOverExpanded(winTypes.Timed)
+    //game.onGameOverExpanded(winTypes.Timed)
+    game.customGameOverExpanded("Spooky!", effects.confetti, music.magicWand, scoreTypes.LTime)
+
 })
 controller.A.onEvent(ControllerButtonEvent.Pressed, function () {
     throwBall = ball.createProjectileBallFromSprite(assets.image`ball-blue`, myBall)
@@ -30,7 +32,7 @@ statusbar.setColor(5, 10)
 statusbar.setBarBorder(1, 1)
 statusbar.setPosition(80, 113)
 let myBooth = sprites.create(assets.image`booth`, SpriteKind.Booth)
-tracers.Cross.setTraceMulti(tracers.Cross)
+myBall.setTraceMulti(tracers.Cross)
 info.startCountdownGame(20, winTypes.Score)
 myBall.setIter(10)
 myBall.variablePower(statusbar, 50, 100)
