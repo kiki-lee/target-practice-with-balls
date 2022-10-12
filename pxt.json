@@ -1,5 +1,6 @@
 {
     "name": "target practice with balls - Complex",
+    "version": "1.0.0",
     "description": "",
     "dependencies": {
         "device": "*",
