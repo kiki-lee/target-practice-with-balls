@@ -708,9 +708,10 @@ class Ball extends sprites.ExtendableSprite {
      * Set how to show the trace for the estimated path
      * @param on whether to turn on or off this feature, eg: true
      */
-    //% blockId=setTraceMulti block="trace &this path estimate $traceWay"
+    //% blockId=setTraceMulti block="trace $this path estimate $traceWay"
     //% weight=50
-    //% traceWay.defn = tracers.Full
+    //% traceWay.defl="tracers.Full"
+    //% this.defl=myBall
     //% group="Actions"
     public setTraceMulti(traceWay: tracers): void {
          
@@ -816,7 +817,7 @@ class Ball extends sprites.ExtendableSprite {
   * to adjust the angle, and up and down to increase / decrease power
   * @param on whether to turn on or off this feature, eg: true
   */
-    //% blockId=variablePower block="set $this power variable on $status from $minNum to $maxNum"
+    //% blockId=variablePower block="set $this power variable on $status from $minNum \\% to $maxNum \\%"
     //% weight=50
     //% minNum.defl = 50
     //% maxNum.defl = 100
