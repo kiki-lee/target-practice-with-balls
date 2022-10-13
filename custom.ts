@@ -73,7 +73,7 @@ enum tracers {
 
 let textSprite: TextSprite = null
 //let fanfare: effects.BackgroundEffect = undefined;
-//let winStyle = winTypes.Score
+//let winStyle="winTypes.Score"
 
 // Get array of player info
 let players: info.PlayerInfo[];
@@ -106,6 +106,126 @@ namespace scene {
 
 namespace info {
     let countdownInitialized = false;
+    let countUpInitialized = false;
+
+    class TimerState {
+        public playerStates: PlayerState[];
+        public visibilityFlag: number;
+
+        //public timerElapsed: number;
+        public bgColor: number;
+        public borderColor: number;
+        public fontColor: number;
+
+        constructor() {
+            this.visibilityFlag = Visibility.Hud;
+            this.bgColor = screen.isMono ? 0 : 1;
+            this.borderColor = screen.isMono ? 1 : 3;
+            this.fontColor = screen.isMono ? 1 : 3;
+        }
+    }
+
+    let timerState: TimerState = undefined;
+
+    let timerStateStack: {
+        state: TimerState,
+        scene: scene.Scene
+    }[];
+
+
+    /**
+     * Adds timer to game
+     */
+    //% color="#cf6a87"
+    //% group=timer
+    //% blockId=start_count_up_game
+    //% block="start timer"
+    //% inlineInputMode=inline
+    export function startTimer() {
+        updateFlag(Visibility.Countdown, true);
+        timerHUD()
+
+    }
+
+    /**
+     * Set whether timer should be displayed
+     * @param on if true, countdown is shown; otherwise, countdown is hidden
+     */
+    //% group=timer
+    export function showTimer(on: boolean) {
+        updateFlag(Visibility.Countdown, on);
+    }
+
+    function updateFlag(flag: Visibility, on: boolean) {
+        timerHUD();
+        if (on) timerState.visibilityFlag |= flag;
+        else timerState.visibilityFlag = ~(~timerState.visibilityFlag | flag);
+    }
+
+    function drawTimer(millis: number) {
+        if (millis < 0) millis = 0;
+        millis |= 0;
+
+        const font = image.font8;
+        const smallFont = image.font5;
+        const seconds = Math.idiv(millis, 1000);
+        const width = font.charWidth * 5 - 2;
+        let left = (screen.width >> 1) - (width >> 1) + 1;
+        let color1 = timerState.fontColor;
+        let color2 = timerState.bgColor;
+
+        screen.fillRect(left - 3, 0, width + 6, font.charHeight + 3, timerState.borderColor)
+        screen.fillRect(left - 2, 0, width + 4, font.charHeight + 2, color2)
+
+        if (seconds < 60) {
+            const top = 1;
+            const remainder = Math.idiv(millis % 1000, 10);
+
+            screen.print(formatDecimal(seconds) + ".", left, top, color1, font)
+            const decimalLeft = left + 3 * font.charWidth;
+            screen.print(formatDecimal(remainder), decimalLeft, top + 2, color1, smallFont)
+        }
+        else {
+            const minutes = Math.idiv(seconds, 60);
+            const remainder = seconds % 60;
+            screen.print(formatDecimal(minutes) + ":" + formatDecimal(remainder), left, 1, color1, font);
+        }
+    }
+    
+    function formatDecimal(val: number) {
+        val |= 0;
+        if (val < 10) {
+            return "0" + val;
+        }
+        return val.toString();
+    }
+
+    function timerHUD() {
+        if (timerState) return;
+
+        timerState = new TimerState();
+
+        scene.createRenderable(
+            scene.HUD_Z,
+            () => {
+
+                // show timer
+                if (timerState.visibilityFlag & Visibility.Countdown) {
+                    const scene = game.currentScene();
+                    const elapsed = scene.millis();
+                    drawTimer(elapsed);
+                    let t = elapsed / 1000;
+                    if (t <= 0) {
+                        t = 0;
+                        
+                    }
+                }
+            }
+        );
+    }
+
+
+
     /**
      * Adds game end style to countdown
      */
@@ -156,7 +276,8 @@ namespace info {
         let bestScore = info.highScore(); // What is the bestScore of all time?
 
         // Save number of seconds passed during game
-        const timeElapsed = Math.floor(game.runtime() / 1000);  // Score doesn't seem to accept decimals
+        const thisScene = game.currentScene();
+        const timeElapsed = Math.floor(thisScene.millis() / 1000);  // Score doesn't seem to accept decimals
 
         /*
         // Save all scores as relevant to the game.
@@ -744,7 +865,7 @@ class Ball extends sprites.ExtendableSprite {
     //% blockId=updatecross block="update crosshairs || using distance $dist "
     //% weight=50
     //% group="Actions"
-    //% dist.defn = 3
+    //% dist.defl=3
     public update_crosshair(dist?:number) {
     if(dist == undefined) {dist = 3;}
     spriteutils.placeAngleFrom(
@@ -758,10 +879,11 @@ class Ball extends sprites.ExtendableSprite {
     /**
      * Set the trace length for the estimated path in percent
      */
-    //% blockId=setIter block="set $this trace length to $len percent"
+    //% blockId=setIter block="set $this trace length to $len \\%"
     //% weight=50
     //% group="Actions"
-    //% len.defn = 50
+    //% len.defl=50
+    //% this.defl=myBall
     public setIter(len: number): void {
         // Make 100 percent distance = 3
         this.iter = 3 * (len/100);
@@ -784,6 +906,7 @@ class Ball extends sprites.ExtendableSprite {
      * Stop the throwable at the current location
      */
     //% blockId=stopIt block="stop $this"
+    //% this.defl=myBall
     //% weight=50
     //% group="Actions"
     public stopIt(): void {
@@ -799,6 +922,7 @@ class Ball extends sprites.ExtendableSprite {
      * @param on whether to turn on or off this feature, eg: true
      */
     //% blockId=controlKeys block="control $this with arrow keys || $on=toggleOnOff"
+    //% this.defl=myBall
     //% weight=50
     //% group="Actions"
     public controlWithArrowKeys(on: boolean = true): void {
@@ -819,8 +943,9 @@ class Ball extends sprites.ExtendableSprite {
   */
     //% blockId=variablePower block="set $this power variable on $status from $minNum \\% to $maxNum \\%"
     //% weight=50
-    //% minNum.defl = 50
-    //% maxNum.defl = 100
+    //% minNum.defl=50
+    //% maxNum.defl=100
+    //% this.defl=myBall
     //% group="Actions"
     public variablePower(status: StatusBarSprite, minNum: number, maxNum: number): void {
 
@@ -842,6 +967,7 @@ class Ball extends sprites.ExtendableSprite {
      * NO LONGER NECESSARY as this uses renderables now to draw onto the background.
      */
     //% blockId=updateBackground block="change $this background to image $img=background_image_picker"
+    //% this.defl=myBall
     //% weight=15
     //% group="Properties"
     //% deprecated=true
