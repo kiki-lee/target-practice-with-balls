@@ -79,12 +79,14 @@ let textSprite: TextSprite = null
 let players: info.PlayerInfo[];
 
 
-namespace scene {
+namespace carnival {
+
     /**
     * Adds text to the top, middle, or bottom
     * of screen as defined by circuis games
     */
     //% color="#4b6584"
+    //% group=scene
     //% blockId=add_label_to
     //% block="add label $myLabel to $myPosition of window || $myColor"
     //% myLabel.defl="Whack-the-Mole"
@@ -101,15 +103,16 @@ namespace scene {
         if (myPosition == areas.Mid) textSprite.setPosition(80, 50);
         if (myPosition == areas.Top) textSprite.setPosition(80, 20);
     }
-}
 
 
-namespace info {
+
+// Formerly of the Info Category -----
+
     let countdownInitialized = false;
     let countUpInitialized = false;
 
     class TimerState {
-        public playerStates: PlayerState[];
+        public playerStates: info.PlayerState[];
         public visibilityFlag: number;
 
         //public timerElapsed: number;
@@ -118,7 +121,7 @@ namespace info {
         public fontColor: number;
 
         constructor() {
-            this.visibilityFlag = Visibility.Hud;
+            this.visibilityFlag = info.Visibility.Hud;
             this.bgColor = screen.isMono ? 0 : 1;
             this.borderColor = screen.isMono ? 1 : 3;
             this.fontColor = screen.isMono ? 1 : 3;
@@ -143,7 +146,7 @@ namespace info {
     //% inlineInputMode=inline
     export function startTimer() {
         control.timer1.reset();
-        updateFlag(Visibility.Countdown, true);
+        updateFlag(info.Visibility.Countdown, true);
         timerHUD();
 
     }
@@ -153,11 +156,25 @@ namespace info {
      * @param on if true, countdown is shown; otherwise, countdown is hidden
      */
     //% group=timer
+    //% blockId=show_timer
+    //% block="show timer $on=toggleOnOff"
+    //% inlineInputMode=inline
     export function showTimer(on: boolean) {
-        updateFlag(Visibility.Countdown, on);
+        updateFlag(info.Visibility.Countdown, on);
     }
 
-    function updateFlag(flag: Visibility, on: boolean) {
+    /**
+     * Return the current value of the count-up timer
+     */
+    //% group=timer
+    //% blockId=get_timer
+    //% block="timer value"
+    //% inlineInputMode=inline
+    export function getTimerValue():number {
+        return control.timer1.millis();
+    }
+
+    function updateFlag(flag: info.Visibility, on: boolean) {
         timerHUD();
         if (on) timerState.visibilityFlag |= flag;
         else timerState.visibilityFlag = ~(~timerState.visibilityFlag | flag);
@@ -211,7 +228,7 @@ namespace info {
             () => {
 
                 // show timer
-                if (timerState.visibilityFlag & Visibility.Countdown) {
+                if (timerState.visibilityFlag & info.Visibility.Countdown) {
                     const scene = game.currentScene();
                     //const elapsed = scene.millis();
                     const elapsed = control.timer1.millis();
@@ -386,7 +403,7 @@ namespace info {
                 newBest = true;
                 bestScore = thisBest;
                 info.setScore(thisBest);
-                info.saveLowScore(thisBest);
+                carnival.saveLowScore(thisBest);
             }
 
         } else if (scoreType == scoreTypes.HTime) {
@@ -416,7 +433,7 @@ namespace info {
                 newBest = true;
                 bestScore = thisBest;
                 info.setScore(thisBest);
-                info.saveLowScore(thisBest);
+                carnival.saveLowScore(thisBest);
             }
 
         } else {
@@ -558,9 +575,10 @@ namespace info {
             }
         }
     }
-}
 
-namespace game {
+// End Info
+
+// Formerly namespace Game
 
 
     /**
@@ -583,7 +601,7 @@ namespace game {
         if (winStyle == winTypes.Lose) {
             game.over(false, winEffect)
         } else {
-            info.newGameOver(winStyle, winEffect);
+            carnival.newGameOver(winStyle, winEffect);
         }
     }
 
@@ -605,16 +623,18 @@ namespace game {
         if (score == undefined) { info.score();} 
         if (!gameSound) { gameSound = music.powerUp;}
         game.setGameOverSound(true, gameSound);
-        info.newGameOver(winTypes.Custom, winEffect, gameSound, scoring, message, score);
+        carnival.newGameOver(winTypes.Custom, winEffect, gameSound, scoring, message, score);
     }
-}
+
+
+// Formerly namespace Ball
 
 /**
 * A throwable with path prediction
 */
 //% weight=100 color=#6699CC icon="\uf140"
 //% groups='["Create", "Actions", "Properties"]'
-namespace ball {
+
     /**
      * Creates a new throwable from an image and kind
      * @param img the image for the sprite
@@ -647,8 +667,8 @@ namespace ball {
     //% blockSetVariable=throwBall
     //% inlineInputMode=inline
     export function createProjectileBallFromSprite(img: Image, parentBall: Ball, kind?: number): Ball {
-        let vx = ball.xComponent(parentBall.angle, parentBall.pow);
-        let vy = ball.yComponent(parentBall.angle, parentBall.pow);
+        let vx = carnival.xComponent(parentBall.angle, parentBall.pow);
+        let vy = carnival.yComponent(parentBall.angle, parentBall.pow);
         let ay = parentBall.gravity;
         let ax = parentBall.wind;
         let p = parentBall.pow;
@@ -667,13 +687,13 @@ namespace ball {
     //% inlineInputMode=inline
     //% expandableArgumentMode=toggle
     export function createProjectileBall(img: Image, vx: number, vy: number, ax: number, ay: number, power: number, kind?: number, parentBall?: Ball) {
-        const s = ball.create(img, kind || SpriteKind.Projectile);
+        const s = carnival.create(img, kind || SpriteKind.Projectile);
         const sc = game.currentScene();
 
         if (parentBall) {
             s.setPosition(parentBall.x, parentBall.y);
-            s.vx = ball.xComponent(parentBall.angle, parentBall.pow);
-            s.vy = ball.yComponent(parentBall.angle, parentBall.pow);
+            s.vx = carnival.xComponent(parentBall.angle, parentBall.pow);
+            s.vy = carnival.yComponent(parentBall.angle, parentBall.pow);
             s.ay = parentBall.gravity;
             s.ax = parentBall.wind;
             s.pow = parentBall.pow;
@@ -808,8 +828,8 @@ class Ball extends sprites.ExtendableSprite {
         this.moon.setFlag(SpriteFlag.Invisible, true);
 
         this.renderable = scene.createRenderable(-0.5, (target, camera) => {
-            let xComp = ball.xComponent(this.angle, this.pow);
-            let yComp = ball.yComponent(this.angle, this.pow);
+            let xComp = carnival.xComponent(this.angle, this.pow);
+            let yComp = carnival.yComponent(this.angle, this.pow);
             let xOffset = camera.offsetX;
             let yOffset = camera.offsetY;
 
@@ -877,6 +897,7 @@ class Ball extends sprites.ExtendableSprite {
      * ball in direction ball will travel
      */
     //% blockId=updatecross block="update crosshairs || using distance $dist "
+    //% expandableArgumentMode=toggle
     //% weight=50
     //% group="Actions"
     //% dist.defl=3
@@ -910,8 +931,8 @@ class Ball extends sprites.ExtendableSprite {
     //% weight=50
     //% group="Actions"
     public throwIt(): void {
-        this.vx = ball.xComponent(this.angle, this.pow);
-        this.vy = ball.yComponent(this.angle, this.pow);
+        this.vx = carnival.xComponent(this.angle, this.pow);
+        this.vy = carnival.yComponent(this.angle, this.pow);
         this.ay = this.gravity;
         this.ax = this.wind;
     }
@@ -970,25 +991,6 @@ class Ball extends sprites.ExtendableSprite {
             this.pow = status.value;
             this.update_crosshair();
         })
-    }
-
-      /* Duplicate of sprite destroy?
-    destroy(effect?: effects.ParticleEffect, duration?: number) {
-        super.destroy(effect, duration);
-        this.renderable.destroy();
-    }
-    */
-
-    /**
-     *  Is this necessary?
-     */
-    //% blockId=updateBackground block="change $this background to image $img=background_image_picker"
-    //% this.defl=myBall
-    //% weight=15
-    //% group="Properties"
-    //% deprecated=true
-    public updateBackground(img: Image): void {
-        scene.setBackgroundImage(img);
     }
 
 }
