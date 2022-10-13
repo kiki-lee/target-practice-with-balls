@@ -962,11 +962,12 @@ class Ball extends sprites.ExtendableSprite {
     //% this.defl=myBall
     //% group="Actions"
     public variablePower(status: StatusBarSprite, minNum: number, maxNum: number): void {
-
+        if(minNum < 0){minNum = 0;}
+        if(maxNum > 100){maxNum = 100;}
         game.onUpdate(() => {
-            status.value = minNum + (Math.sin(game.runtime() / 500) * (maxNum-minNum))
-            this.pow = status.value
-            this.update_crosshair()
+            status.value = minNum + Math.abs(Math.sin(game.runtime() / 1000) * (maxNum-minNum))
+            this.pow = status.value;
+            this.update_crosshair();
         })
     }
 
