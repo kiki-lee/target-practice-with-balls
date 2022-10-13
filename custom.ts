@@ -84,6 +84,7 @@ let players: info.PlayerInfo[];
 * An extension full of carnival goodness
 */
 //% weight=100 color=#b70082 icon="\uf54e"
+//% groups='["Ball", "Timer", "Countdown", "Game", "Scene"]'
 namespace carnival {
 
     /**
@@ -143,7 +144,7 @@ namespace carnival {
     /**
      * Adds timer to game
      */
-    //% color="#cf6a87"
+    //% color="#b70082"
     //% group=timer
     //% blockId=start_count_up_game
     //% block="start timer"
@@ -159,7 +160,7 @@ namespace carnival {
      * Set whether timer should be displayed
      * @param on if true, countdown is shown; otherwise, countdown is hidden
      */
-    //% color="#cf6a87"
+    //% color="#b70082"
     //% group=timer
     //% blockId=show_timer
     //% block="show timer $on=toggleOnOff"
@@ -171,7 +172,7 @@ namespace carnival {
     /**
      * Return the current value of the count-up timer
      */
-    //% color="#cf6a87"
+    //% color="#b70082"
     //% group=timer
     //% blockId=get_timer
     //% block="timer value"
@@ -255,7 +256,7 @@ namespace carnival {
     /**
      * Adds game end style to countdown
      */
-    //% color="#cf6a87"
+    //% color="#b70082"
     //% group=countdown
     //% blockId=start_countdown_game
     //% block="start countdown $myTime (s) and game over $winType || effect $winEffect"
@@ -283,17 +284,13 @@ namespace carnival {
         }
     }
 
-    /**
- * Get the last recorded low score
- */
-    //% weight=94
-    //% blockId=lowScore block="low score"
-    //% group="Score"
+    // Get the last recorded low score
     function lowScore(): number {
         return settings.readNumber("low-score");
     }
 
-    export function newGameOver(winStyle: winTypes, fanfare: effects.BackgroundEffect, winSound?:music.Melody, scoreType?: scoreTypes, message?: string, customScore?: number) {
+
+    function newGameOver(winStyle: winTypes, fanfare: effects.BackgroundEffect, winSound?:music.Melody, scoreType?: scoreTypes, message?: string, customScore?: number) {
 
         // Prep default variables for different win types
         let winnerNumber = [1];  // Which players have the high scores?
@@ -591,8 +588,8 @@ namespace carnival {
     /**
      * Adds additional end game styles
      */
-    //% color="#8854d0"
-    //% group=Gameplay
+    //% color="#b70082"
+    //% group=game
     //% blockId=on_game_over_expanded
     //% block="game over $winStyle || add effect $winEffect"
     //% winType.defl=winTypes.Win
@@ -608,15 +605,15 @@ namespace carnival {
         if (winStyle == winTypes.Lose) {
             game.over(false, winEffect)
         } else {
-            carnival.newGameOver(winStyle, winEffect);
+            newGameOver(winStyle, winEffect);
         }
     }
 
     /**
      * Adds custom end game styles
      */
-    //% color="#8854d0"
-    //% group=Gameplay
+    //% color="#b70082"
+    //% group=game
     //% blockId=on_game_over_custom_expanded
     //% block="game over $message || with $winEffect and $gameSound send score $score judge $scoring"
     //% message.defl="Great Job!"
@@ -630,7 +627,7 @@ namespace carnival {
         if (score == undefined) { info.score();} 
         if (!gameSound) { gameSound = music.powerUp;}
         game.setGameOverSound(true, gameSound);
-        carnival.newGameOver(winTypes.Custom, winEffect, gameSound, scoring, message, score);
+        newGameOver(winTypes.Custom, winEffect, gameSound, scoring, message, score);
     }
 
 
@@ -646,11 +643,12 @@ namespace carnival {
      * @param y optional initial y position, eg: 110
      */
     //% blockId=throwCreate block="ball $img=screen_image_picker of kind $kind=spritekind || at x $x y $y"
+    //% color="#b70082"
+    //% group=ball
     //% expandableArgumentMode=toggle
     //% inlineInputMode=inline
     //% blockSetVariable=myBall
     //% weight=100
-    //% group="Create"
     export function create(img: Image,
         kind: number,
         x: number = 10,
@@ -664,13 +662,14 @@ namespace carnival {
    * Create a new ball with a given speed that starts from the location of another sprite.
    * The sprite auto-destroys when it leaves the screen. You can modify position after it's created.
    */
-    //% group="Projectiles"
+    //% group=ball
+    //% color="#b70082"
     //% blockId=spritescreateprojectileballfromparent block="ball $img=screen_image_picker based on $parentBall=variables_get(myBall) || of kind $kind=spritekind"
     //% weight=99
     //% blockSetVariable=throwBall
     //% inlineInputMode=inline
     export function createProjectileBallFromSprite(img: Image, parentBall: Ball, kind?: number): Ball {
-        let vx = carnival.xComponent(parentBall.angle, parentBall.pow);
+        let vx = xComponent(parentBall.angle, parentBall.pow);
         let vy = carnival.yComponent(parentBall.angle, parentBall.pow);
         let ay = parentBall.gravity;
         let ax = parentBall.wind;
@@ -683,7 +682,8 @@ namespace carnival {
      * Create a new sprite with given speed, and place it at the edge of the screen so it moves towards the middle.
      * The sprite auto-destroys when it leaves the screen. You can modify position after it's created.
      */
-    //% group="Projectiles"
+    //% group=ball
+    //% color="#b70082"
     //% blockId=spritescreateprojectileball block="ball $img=screen_image_picker vx $vx vy $vy of kind $kind=spritekind||based on $parentBall=variables_get(myBall)"
     //% weight=99
     //% blockSetVariable=throwBall
@@ -695,7 +695,7 @@ namespace carnival {
 
         if (parentBall) {
             s.setPosition(parentBall.x, parentBall.y);
-            s.vx = carnival.xComponent(parentBall.angle, parentBall.pow);
+            s.vx = xComponent(parentBall.angle, parentBall.pow);
             s.vy = carnival.yComponent(parentBall.angle, parentBall.pow);
             s.ay = parentBall.gravity;
             s.ax = parentBall.wind;
@@ -738,7 +738,7 @@ namespace carnival {
      * @param degree to convert
      * @return converted value in radians
      */
-    export function degreeToRadian(degree: number): number {
+    function degreeToRadian(degree: number): number {
         return degree * Math.PI / 180;
     }
 
@@ -868,9 +868,10 @@ class Ball extends sprites.ExtendableSprite {
      */
     //% blockId=setTraceMulti block="trace $this path estimate $traceWay"
     //% weight=50
+    //% color="#b70082"
     //% traceWay.defl="tracers.Full"
     //% this.defl=myBall
-    //% group="Actions"
+    //% group=ball
     public setTraceMulti(traceWay: tracers): void {
          
         if(traceWay == tracers.Full){
@@ -901,8 +902,9 @@ class Ball extends sprites.ExtendableSprite {
      */
     //% blockId=updatecross block="update crosshairs || using distance $dist "
     //% expandableArgumentMode=toggle
+    //% color="#b70082"
     //% weight=50
-    //% group="Actions"
+    //% group=ball
     //% dist.defl=3
     public update_crosshair(dist?:number) {
     if(dist == undefined) {dist = 3;}
@@ -919,7 +921,8 @@ class Ball extends sprites.ExtendableSprite {
      */
     //% blockId=setIter block="set $this trace length to $len \\%"
     //% weight=50
-    //% group="Actions"
+    //% color="#b70082"
+    //% group=ball
     //% len.defl=50
     //% this.defl=myBall
     public setIter(len: number): void {
@@ -932,7 +935,8 @@ class Ball extends sprites.ExtendableSprite {
      */
     //% blockId=throwIt block="toss $ball(myBall)"
     //% weight=50
-    //% group="Actions"
+    //% color="#b70082"
+    //% group=ball
     public throwIt(): void {
         this.vx = carnival.xComponent(this.angle, this.pow);
         this.vy = carnival.yComponent(this.angle, this.pow);
@@ -945,8 +949,9 @@ class Ball extends sprites.ExtendableSprite {
      */
     //% blockId=stopIt block="stop $this"
     //% this.defl=myBall
+    //% color="#b70082"
     //% weight=50
-    //% group="Actions"
+    //% group=ball
     public stopIt(): void {
         this.ay = 0;
         this.ax = 0;
@@ -961,8 +966,9 @@ class Ball extends sprites.ExtendableSprite {
      */
     //% blockId=controlKeys block="control $this with arrow keys || $on=toggleOnOff"
     //% this.defl=myBall
+    //% color="#b70082"
     //% weight=50
-    //% group="Actions"
+    //% group=ball
     public controlWithArrowKeys(on: boolean = true): void {
         this.controlKeys = on;
 
@@ -981,10 +987,11 @@ class Ball extends sprites.ExtendableSprite {
   */
     //% blockId=variablePower block="vary $this power using $status from $minNum \\% to $maxNum \\% || speed $thisSpeed"
     //% weight=50
+    //% color="#b70082"
+    //% group=ball
     //% minNum.defl=50
     //% maxNum.defl=100
     //% this.defl=myBall
-    //% group="Actions"
     public variablePower(status: StatusBarSprite, minNum: number, maxNum: number, thisSpeed?:number): void {
         if(thisSpeed == undefined){thisSpeed = 100;}
         if(minNum < 0){minNum = 0;}
