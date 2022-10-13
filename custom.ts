@@ -955,23 +955,24 @@ class Ball extends sprites.ExtendableSprite {
   * to adjust the angle, and up and down to increase / decrease power
   * @param on whether to turn on or off this feature, eg: true
   */
-    //% blockId=variablePower block="set $this power variable on $status from $minNum \\% to $maxNum \\%"
+    //% blockId=variablePower block="vary $this power using $status from $minNum \\% to $maxNum \\% || speed $thisSpeed"
     //% weight=50
     //% minNum.defl=50
     //% maxNum.defl=100
     //% this.defl=myBall
     //% group="Actions"
-    public variablePower(status: StatusBarSprite, minNum: number, maxNum: number): void {
+    public variablePower(status: StatusBarSprite, minNum: number, maxNum: number, thisSpeed?:number): void {
+        if(thisSpeed == undefined){thisSpeed = 100;}
         if(minNum < 0){minNum = 0;}
         if(maxNum > 100){maxNum = 100;}
         game.onUpdate(() => {
-            status.value = minNum + Math.abs(Math.sin(game.runtime() / 1000) * (maxNum-minNum))
+            status.value = minNum + Math.abs(Math.sin(game.runtime() / (90000*(1/thisSpeed))) * (maxNum-minNum))
             this.pow = status.value;
             this.update_crosshair();
         })
     }
 
-    /* Duplicate of sprite destroy?
+      /* Duplicate of sprite destroy?
     destroy(effect?: effects.ParticleEffect, duration?: number) {
         super.destroy(effect, duration);
         this.renderable.destroy();
@@ -979,7 +980,7 @@ class Ball extends sprites.ExtendableSprite {
     */
 
     /**
-     * NO LONGER NECESSARY as this uses renderables now to draw onto the background.
+     *  Is this necessary?
      */
     //% blockId=updateBackground block="change $this background to image $img=background_image_picker"
     //% this.defl=myBall
@@ -989,4 +990,5 @@ class Ball extends sprites.ExtendableSprite {
     public updateBackground(img: Image): void {
         scene.setBackgroundImage(img);
     }
+
 }

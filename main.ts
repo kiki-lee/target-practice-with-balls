@@ -36,7 +36,7 @@ info.startTimer()
 myBall.controlWithArrowKeys(true)
 myBall.setIter(10)
 myBall.setTraceMulti(tracers.Cross)
-myBall.variablePower(statusbar, 50, 100)
+myBall.variablePower(statusbar, 40, 60, 100)
 forever(function () {
     theTarget = sprites.createProjectileFromSide(assets.image`target`, 50, 0)
     theTarget.bottom = 56
