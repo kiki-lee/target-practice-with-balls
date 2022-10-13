@@ -79,13 +79,17 @@ let textSprite: TextSprite = null
 let players: info.PlayerInfo[];
 
 
+
+/**
+* An extension full of carnival goodness
+*/
+//% weight=100 color=#b70082 icon="\uf54e"
 namespace carnival {
 
     /**
     * Adds text to the top, middle, or bottom
-    * of screen as defined by circuis games
+    * of screen as defined by games
     */
-    //% color="#4b6584"
     //% group=scene
     //% blockId=add_label_to
     //% block="add label $myLabel to $myPosition of window || $myColor"
@@ -155,6 +159,7 @@ namespace carnival {
      * Set whether timer should be displayed
      * @param on if true, countdown is shown; otherwise, countdown is hidden
      */
+    //% color="#cf6a87"
     //% group=timer
     //% blockId=show_timer
     //% block="show timer $on=toggleOnOff"
@@ -166,6 +171,7 @@ namespace carnival {
     /**
      * Return the current value of the count-up timer
      */
+    //% color="#cf6a87"
     //% group=timer
     //% blockId=get_timer
     //% block="timer value"
@@ -173,6 +179,7 @@ namespace carnival {
     export function getTimerValue():number {
         return control.timer1.millis();
     }
+
 
     function updateFlag(flag: info.Visibility, on: boolean) {
         timerHUD();
@@ -269,7 +276,7 @@ namespace carnival {
 
     }
 
-    export function saveLowScore(newLow: number) {
+    function saveLowScore(newLow: number) {
         const curr = settings.readNumber("low-score")
         if (curr == undefined || newLow < curr){
             settings.writeNumber("low-score", newLow);
@@ -282,7 +289,7 @@ namespace carnival {
     //% weight=94
     //% blockId=lowScore block="low score"
     //% group="Score"
-    export function lowScore(): number {
+    function lowScore(): number {
         return settings.readNumber("low-score");
     }
 
@@ -403,7 +410,7 @@ namespace carnival {
                 newBest = true;
                 bestScore = thisBest;
                 info.setScore(thisBest);
-                carnival.saveLowScore(thisBest);
+                saveLowScore(thisBest);
             }
 
         } else if (scoreType == scoreTypes.HTime) {
@@ -433,7 +440,7 @@ namespace carnival {
                 newBest = true;
                 bestScore = thisBest;
                 info.setScore(thisBest);
-                carnival.saveLowScore(thisBest);
+                saveLowScore(thisBest);
             }
 
         } else {
@@ -629,11 +636,7 @@ namespace carnival {
 
 // Formerly namespace Ball
 
-/**
-* A throwable with path prediction
-*/
-//% weight=100 color=#6699CC icon="\uf140"
-//% groups='["Create", "Actions", "Properties"]'
+
 
     /**
      * Creates a new throwable from an image and kind
