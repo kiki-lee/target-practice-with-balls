@@ -142,8 +142,9 @@ namespace info {
     //% block="start timer"
     //% inlineInputMode=inline
     export function startTimer() {
+        control.timer1.reset();
         updateFlag(Visibility.Countdown, true);
-        timerHUD()
+        timerHUD();
 
     }
 
@@ -212,7 +213,8 @@ namespace info {
                 // show timer
                 if (timerState.visibilityFlag & Visibility.Countdown) {
                     const scene = game.currentScene();
-                    const elapsed = scene.millis();
+                    //const elapsed = scene.millis();
+                    const elapsed = control.timer1.millis();
                     drawTimer(elapsed);
                     let t = elapsed / 1000;
                     if (t <= 0) {
@@ -277,7 +279,14 @@ namespace info {
 
         // Save number of seconds passed during game
         const thisScene = game.currentScene();
-        const timeElapsed = Math.floor(thisScene.millis() / 1000);  // Score doesn't seem to accept decimals
+        //let timeElapsed = roundOff(thisScene.millis() / 1000, 2); //Can't get points to match timer perfectly
+        let timeElapsed = Math.floor(thisScene.millis() / 1000);  
+  
+        if (control.timer1.millis() >=0) {
+            timeElapsed = Math.floor(control.timer1.millis() / 1000); 
+            // timeElapsed = roundOff(control.timer1.millis() / 1000, 2);  //Can't get points to match timer perfectly
+ 
+        }
 
         /*
         // Save all scores as relevant to the game.
@@ -447,6 +456,11 @@ namespace info {
         game.waitAnyButton();
         control.reset();
 
+    }
+
+    function roundOff(thisNum:number, toPlace:number): number {
+        const x = Math.pow(10, toPlace);
+        return Math.round(thisNum * x) / x;
     }
 
     function init(winStyle: winTypes, fanfare: effects.BackgroundEffect) {

@@ -1,3 +1,6 @@
+controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
+    info.startTimer()
+})
 // game.onGameOverExpanded(winTypes.Multi)
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     info.player2.setScore(0)
