@@ -84,6 +84,7 @@ let players: info.PlayerInfo[];
 * An extension full of carnival goodness
 */
 //% weight=100 color=#b70082 icon="\uf54e"
+//% groups='["Ball", "Timer", "Countdown", "Game", "Scene"]'
 namespace carnival {
 
     /**
@@ -647,7 +648,7 @@ namespace carnival {
     //% expandableArgumentMode=toggle
     //% inlineInputMode=inline
     //% blockSetVariable=myBall
-    //% weight=90
+    //% weight=100
     export function create(img: Image,
         kind: number,
         x: number = 10,
@@ -664,7 +665,7 @@ namespace carnival {
     //% group=ball
     //% color="#b70082"
     //% blockId=spritescreateprojectileballfromparent block="ball $img=screen_image_picker based on $parentBall=variables_get(myBall) || of kind $kind=spritekind"
-    //% weight=91
+    //% weight=99
     //% blockSetVariable=throwBall
     //% inlineInputMode=inline
     export function createProjectileBallFromSprite(img: Image, parentBall: Ball, kind?: number): Ball {
@@ -684,7 +685,7 @@ namespace carnival {
     //% group=ball
     //% color="#b70082"
     //% blockId=spritescreateprojectileball block="ball $img=screen_image_picker vx $vx vy $vy of kind $kind=spritekind||based on $parentBall=variables_get(myBall)"
-    //% weight=92
+    //% weight=99
     //% blockSetVariable=throwBall
     //% inlineInputMode=inline
     //% expandableArgumentMode=toggle
@@ -760,251 +761,246 @@ namespace carnival {
     export function yComponent(degree: number, magnitude: number): number {
         return -magnitude * Math.sin(degreeToRadian(degree));
     }
+}
 
+/**
+ * A throwable
+ **/
+//% blockNamespace=ball color="#6699CC" blockGap=8
+class Ball extends sprites.ExtendableSprite {
+    private renderable: scene.Renderable;
+
+    private controlKeys: boolean;
+    private trace: boolean;
+
+    //% group="Properties" blockSetVariable="myBall"
+    //% blockCombine block="angle"
+    //% weight=8
+    public angle: number;
+    //% group="Properties" blockSetVariable="myBall"
+    //% blockCombine block="power"
+    //% weight=8
+    public pow: number;
+    //% group="Properties" blockSetVariable="myBall"
+    //% blockCombine block="tracing time (seconds)"
+    //% weight=8
+    public iter: number;
+    //% group="Properties" blockSetVariable="myBall"
+    //% blockCombine block="trace color"
+    //% weight=8
+    public traceColor: number;
+    //% group="Properties" blockSetVariable="myBall"
+    //% blockCombine block="gravity"
+    //% weight=8
+    public gravity: number;
+    //% group="Properties" blockSetVariable="myBall"
+    //% blockCombine block="wind"
+    //% weight=8
+    public wind: number;
+    //% group="Properties" blockSetVariable="myBall"
+    //% blockCombine block="angle adjust rate"
+    //% weight=8
+    public angleRate: number;
+    //% group="Properties" blockSetVariable="myBall"
+    //% blockCombine block="wind"
+    //% weight=8
+    public powerRate: number;
+    //% group="Properties" blockSetVariable="myBall"
+    //% blockCombine block="moon"
+    //% weight=8
+    public moon: Sprite;
+
+
+    public constructor(img: Image,
+        kind: number,
+        x: number,
+        y: number) {
+        super(img);
+        this.setKind(kind);
+        this.x = x;
+        this.y = y;
+
+        this.gravity = 20;
+        this.pow = 50;
+        this.angle = 10;
+        this.angleRate = 3;
+        this.powerRate = 3;
+        this.iter = .4;
+        this.wind = 0;
+        this.moon = sprites.create(assets.image`crosshair`, SpriteKind.Moon);
+        this.moon.setFlag(SpriteFlag.Invisible, true);
+
+        this.renderable = scene.createRenderable(-0.5, (target, camera) => {
+            let xComp = carnival.xComponent(this.angle, this.pow);
+            let yComp = carnival.yComponent(this.angle, this.pow);
+            let xOffset = camera.offsetX;
+            let yOffset = camera.offsetY;
+
+            for (let i: number = 0.1; i < this.iter; i += i / 5) {
+                let x = this.x + i * xComp + (i ** 2) * this.wind / 2;
+                let y = this.y + i * yComp + (i ** 2) * this.gravity / 2;
+                target.setPixel(
+                    x - xOffset,
+                    y - yOffset,
+                    this.traceColor
+                );
+            }
+        }, () => !this.ay && this.trace);
+
+        this.controlKeys = false;
+        this.trace = false;
+        this.traceColor = 1;
+    }
 
     /**
-     * A throwable
-     **/
-    //% blockNamespace=ball color="#6699CC" blockGap=8
-    export class Ball extends sprites.ExtendableSprite {
-        private renderable: scene.Renderable;
+     * Gets the throwables's sprite
+     */
+    //% group="Properties"
+    //% blockId=throwSprite block="$this sprite"
+    //% weight=8
+    get sprite(): Sprite {
+        return this;
+    }
 
-        private controlKeys: boolean;
-        private trace: boolean;
-
-        //% group="Properties" blockSetVariable="myBall"
-        //% blockCombine block="angle"
-        //% weight=8
-        public angle: number;
-        //% group="Properties" blockSetVariable="myBall"
-        //% blockCombine block="power"
-        //% weight=8
-        public pow: number;
-        //% group="Properties" blockSetVariable="myBall"
-        //% blockCombine block="tracing time (seconds)"
-        //% weight=8
-        public iter: number;
-        //% group="Properties" blockSetVariable="myBall"
-        //% blockCombine block="trace color"
-        //% weight=8
-        public traceColor: number;
-        //% group="Properties" blockSetVariable="myBall"
-        //% blockCombine block="gravity"
-        //% weight=8
-        public gravity: number;
-        //% group="Properties" blockSetVariable="myBall"
-        //% blockCombine block="wind"
-        //% weight=8
-        public wind: number;
-        //% group="Properties" blockSetVariable="myBall"
-        //% blockCombine block="angle adjust rate"
-        //% weight=8
-        public angleRate: number;
-        //% group="Properties" blockSetVariable="myBall"
-        //% blockCombine block="wind"
-        //% weight=8
-        public powerRate: number;
-        //% group="Properties" blockSetVariable="myBall"
-        //% blockCombine block="moon"
-        //% weight=8
-        public moon: Sprite;
-
-
-        public constructor(img: Image,
-            kind: number,
-            x: number,
-            y: number) {
-            super(img);
-            this.setKind(kind);
-            this.x = x;
-            this.y = y;
-
-            this.gravity = 20;
-            this.pow = 50;
-            this.angle = 10;
-            this.angleRate = 3;
-            this.powerRate = 3;
-            this.iter = .4;
-            this.wind = 0;
-            this.moon = sprites.create(assets.image`crosshair`, SpriteKind.Moon);
+    /**
+     * Set how to show the trace for the estimated path
+     * @param on whether to turn on or off this feature, eg: true
+     */
+    //% blockId=setTraceMulti block="trace $this path estimate $traceWay"
+    //% weight=50
+    //% color="#b70082"
+    //% traceWay.defl="tracers.Full"
+    //% this.defl=myBall
+    //% group=ball
+    public setTraceMulti(traceWay: tracers): void {
+         
+        if(traceWay == tracers.Full){
             this.moon.setFlag(SpriteFlag.Invisible, true);
-
-            this.renderable = scene.createRenderable(-0.5, (target, camera) => {
-                let xComp = carnival.xComponent(this.angle, this.pow);
-                let yComp = carnival.yComponent(this.angle, this.pow);
-                let xOffset = camera.offsetX;
-                let yOffset = camera.offsetY;
-
-                for (let i: number = 0.1; i < this.iter; i += i / 5) {
-                    let x = this.x + i * xComp + (i ** 2) * this.wind / 2;
-                    let y = this.y + i * yComp + (i ** 2) * this.gravity / 2;
-                    target.setPixel(
-                        x - xOffset,
-                        y - yOffset,
-                        this.traceColor
-                    );
-                }
-            }, () => !this.ay && this.trace);
-
-            this.controlKeys = false;
+            this.iter = 3;
+            this.trace = true;
+        } else if (traceWay == tracers.Part) {
+            this.moon.setFlag(SpriteFlag.Invisible, true);
+            this.iter = .3;
+            this.trace = true;
+        } else if (traceWay == tracers.Pointer) {
+            this.moon.setFlag(SpriteFlag.Invisible, true);
+            this.iter = .2;
+            this.trace = true;
+        } else if (traceWay == tracers.Cross) {
             this.trace = false;
-            this.traceColor = 1;
+            this.moon.setFlag(SpriteFlag.Invisible, false);
+        } else {
+            this.trace = false;
+            this.moon.setFlag(SpriteFlag.Invisible, false);
         }
-
-        /**
-         * Gets the throwables's sprite
-         */
-        //% group="Properties"
-        //% blockId=throwSprite block="$this sprite"
-        //% weight=98
-        get sprite(): Sprite {
-            return this;
-        }
-
-        /**
-         * Set how to show the trace for the estimated path
-         * @param on whether to turn on or off this feature, eg: true
-         */
-        //% blockId=setTraceMulti block="trace $this path estimate $traceWay"
-        //% weight=200
-        //% color="#b70082"
-        //% traceWay.defl="tracers.Full"
-        //% this.defl=myBall
-        //% group=ball
-        public setTraceMulti(traceWay: tracers): void {
-            
-            if(traceWay == tracers.Full){
-                this.moon.setFlag(SpriteFlag.Invisible, true);
-                this.iter = 3;
-                this.trace = true;
-            } else if (traceWay == tracers.Part) {
-                this.moon.setFlag(SpriteFlag.Invisible, true);
-                this.iter = .3;
-                this.trace = true;
-            } else if (traceWay == tracers.Pointer) {
-                this.moon.setFlag(SpriteFlag.Invisible, true);
-                this.iter = .2;
-                this.trace = true;
-            } else if (traceWay == tracers.Cross) {
-                this.trace = false;
-                this.moon.setFlag(SpriteFlag.Invisible, false);
-            } else {
-                this.trace = false;
-                this.moon.setFlag(SpriteFlag.Invisible, false);
-            }
-        }
-
-
-        /**
-         * Set the trace length for the estimated path in percent
-         */
-        //% blockId=setIter block="set $this trace length to $len \\%"
-        //% weight=50
-        //% color="#b70082"
-        //% group=ball
-        //% len.defl=50
-        //% this.defl=myBall
-        public setIter(len: number): void {
-            // Make 100 percent distance = 3
-            this.iter = 3 * (len/100);
-        }
-
-        /**
-         * Set the crosshairs to distance away from center of 
-         * ball in direction ball will travel
-         */
-        //% blockId=updatecross block="update crosshairs on $this || using distance $dist "
-        //% expandableArgumentMode=toggle
-        //% color="#b70082"
-        //% weight=50
-        //% group=ball
-        //% this.defl=myBall
-        //% dist.defl=3
-        public update_crosshair(dist?: number) {
-            if (dist == undefined) { dist = 3; }
-            spriteutils.placeAngleFrom(
-                this.moon,
-                this.angle * Math.PI / -180,
-                Math.max(this.width + dist, this.height + dist),
-                this
-            )
-        }
-
-        /**
-         * Set whether to control the throwable with the arrow keys; left and right
-         * to adjust the angle, and up and down to increase / decrease power
-         * @param on whether to turn on or off this feature, eg: true
-         */
-        //% color="#b70082"
-        //% group=ball
-        //% blockId=controlWithKeys block="control $this with arrow keys || $on=toggleOnOff"
-        //% this.defl=myBall
-        //% expandableArgumentMode=toggle
-
-        public controlWithArrowKeys(on: boolean = true): void {
-            this.controlKeys = on;
-
-            game.onUpdate(() => {
-                if (this.controlKeys) {
-                    this.angle -= controller.dx() * this.angleRate / 2;
-                    this.pow -= controller.dy() * this.powerRate / 2;
-                }
-            })
-        }
-     
     }
 
 
+    /**
+     * Set the crosshairs to distance away from center of 
+     * ball in direction ball will travel
+     */
+    //% blockId=updatecross block="update crosshairs || using distance $dist "
+    //% expandableArgumentMode=toggle
+    //% color="#b70082"
+    //% weight=50
+    //% group=ball
+    //% dist.defl=3
+    public update_crosshair(dist?:number) {
+    if(dist == undefined) {dist = 3;}
+    spriteutils.placeAngleFrom(
+        this.moon,
+        this.angle * Math.PI / -180,
+        Math.max(this.width + dist, this.height + dist),
+        this
+    )
+}
 
-    /*
-    * Automatically adjust ball power using
-    * statusbar as an indicator
-    */
+    /**
+     * Set the trace length for the estimated path in percent
+     */
+    //% blockId=setIter block="set $this trace length to $len \\%"
+    //% weight=50
     //% color="#b70082"
     //% group=ball
-    //% blockId=variablePower block="vary $thisBall power using $status from $minNum \\% to $maxNum \\% || speed $thisSpeed"
+    //% len.defl=50
+    //% this.defl=myBall
+    public setIter(len: number): void {
+        // Make 100 percent distance = 3
+        this.iter = 3 * (len/100);
+    }
+
+    /**
+     * Throw the throwable with the current settings
+     */
+    //% blockId=throwIt block="toss $ball(myBall)"
+    //% weight=50
+    //% color="#b70082"
+    //% group=ball
+    public throwIt(): void {
+        this.vx = carnival.xComponent(this.angle, this.pow);
+        this.vy = carnival.yComponent(this.angle, this.pow);
+        this.ay = this.gravity;
+        this.ax = this.wind;
+    }
+
+    /**
+     * Stop the throwable at the current location
+     */
+    //% blockId=stopIt block="stop $this"
+    //% this.defl=myBall
+    //% color="#b70082"
+    //% weight=50
+    //% group=ball
+    public stopIt(): void {
+        this.ay = 0;
+        this.ax = 0;
+        this.vx = 0;
+        this.vy = 0;
+    }
+
+    /**
+     * Set whether to control the throwable with the arrow keys; left and right
+     * to adjust the angle, and up and down to increase / decrease power
+     * @param on whether to turn on or off this feature, eg: true
+     */
+    //% blockId=controlKeys block="control $this with arrow keys || $on=toggleOnOff"
+    //% this.defl=myBall
+    //% color="#b70082"
+    //% weight=50
+    //% group=ball
+    public controlWithArrowKeys(on: boolean = true): void {
+        this.controlKeys = on;
+
+        game.onUpdate(() => {
+            if (this.controlKeys) {
+                this.angle -= controller.dx() * this.angleRate / 2;
+                this.pow -= controller.dy() * this.powerRate / 2;
+            }
+        })
+    }
+
+    /**
+  * Set whether to control the throwable with the arrow keys; left and right
+  * to adjust the angle, and up and down to increase / decrease power
+  * @param on whether to turn on or off this feature, eg: true
+  */
+    //% blockId=variablePower block="vary $this power using $status from $minNum \\% to $maxNum \\% || speed $thisSpeed"
+    //% weight=50
+    //% color="#b70082"
+    //% group=ball
     //% minNum.defl=50
     //% maxNum.defl=100
-    //% thisBall.defl=myBall
-    //% inlineInputMode=inline
-    export function variablePower(thisBall:Ball, status: StatusBarSprite, minNum: number, maxNum: number, thisSpeed?:number): void {
+    //% this.defl=myBall
+    public variablePower(status: StatusBarSprite, minNum: number, maxNum: number, thisSpeed?:number): void {
         if(thisSpeed == undefined){thisSpeed = 100;}
         if(minNum < 0){minNum = 0;}
         if(maxNum > 100){maxNum = 100;}
         game.onUpdate(() => {
             status.value = minNum + Math.abs(Math.sin(game.runtime() / (90000*(1/thisSpeed))) * (maxNum-minNum))
-            thisBall.pow = status.value;
-            thisBall.update_crosshair();
+            this.pow = status.value;
+            this.update_crosshair();
         })
     }
 
-    /*
-     * Throw the throwable with the current settings
-     */
-    //% color="#b70082"
-    //% group=ball
-    //% blockId=throwIt block="toss $thisBall"
-    //% thisBall.defl=myBall
-    export function throwIt(thisBall:Ball): void {
-        thisBall.vx = carnival.xComponent(thisBall.angle, thisBall.pow);
-        thisBall.vy = carnival.yComponent(thisBall.angle, thisBall.pow);
-        thisBall.ay = thisBall.gravity;
-        thisBall.ax = thisBall.wind;
-    }
-
-    /*
-     * Stop the throwable at the current location
-     */
-    //% color="#b70082"
-    //% group=ball
-    //% blockId=stopIt block="stop $thisBall"
-    //% thisBall.defl=myBall
-    export function stopIt(thisBall:Ball): void {
-        thisBall.ay = 0;
-        thisBall.ax = 0;
-        thisBall.vx = 0;
-        thisBall.vy = 0;
-    }
-
-    
 }

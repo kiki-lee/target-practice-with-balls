@@ -22,8 +22,8 @@ sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, oth
     music.baDing.play()
 })
 let theTarget: Sprite = null
-let throwBall: carnival.Ball = null
-let myBall: carnival.Ball = null
+let throwBall: Ball = null
+let myBall: Ball = null
 scene.setBackgroundImage(assets.image`wildWest`)
 myBall = carnival.create(assets.image`ball-yellow`, SpriteKind.Player)
 myBall.setPosition(80, 90)
@@ -36,7 +36,12 @@ carnival.startTimer()
 myBall.controlWithArrowKeys(true)
 myBall.setIter(10)
 myBall.setTraceMulti(tracers.Cross)
-carnival.variablePower(myBall, statusbar, 30, 50, 100)
+myBall.variablePower(
+statusbar,
+30,
+50,
+100
+)
 forever(function () {
     theTarget = sprites.createProjectileFromSide(assets.image`target`, 50, 0)
     theTarget.bottom = 56
