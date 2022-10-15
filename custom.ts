@@ -810,7 +810,8 @@ class Ball extends sprites.ExtendableSprite {
     //% blockCombine block="wind"
     //% weight=8
     public powerRate: number;
-
+    //% group="Ball" blockSetVariable="myBall"
+    //% weight=8
     public moon: Sprite;
 
 
