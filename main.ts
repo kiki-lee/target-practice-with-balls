@@ -33,7 +33,7 @@ statusbar.setBarBorder(1, 1)
 statusbar.setPosition(80, 113)
 let myBooth = sprites.create(assets.image`booth`, SpriteKind.Booth)
 carnival.startTimer()
-myBall.controlWithArrowKeys(true)
+myBall.controlBallWithArrowKeys(true)
 myBall.setIter(10)
 myBall.setTraceMulti(tracers.Cross)
 myBall.variablePower(
