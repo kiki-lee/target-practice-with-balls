@@ -84,7 +84,6 @@ let players: info.PlayerInfo[];
 * An extension full of carnival goodness
 */
 //% weight=100 color=#b70082 icon="\uf54e"
-//% groups='["Ball", "Timer", "Countdown", "Game", "Scene"]'
 namespace carnival {
 
     /**
@@ -910,58 +909,57 @@ namespace carnival {
             this.iter = 3 * (len/100);
         }
 
-            /**
-     * Set the crosshairs to distance away from center of 
-     * ball in direction ball will travel
-     */
-    //% blockId=updatecross block="update crosshairs on $this || using distance $dist "
-    //% expandableArgumentMode=toggle
-    //% color="#b70082"
-    //% weight=50
-    //% group=ball
-    //% this.defl=myBall
-    //% dist.defl=3
-    public update_crosshair(dist?: number) {
-        if (dist == undefined) { dist = 3; }
-        spriteutils.placeAngleFrom(
-            this.moon,
-            this.angle * Math.PI / -180,
-            Math.max(this.width + dist, this.height + dist),
-            this
-        )
+        /**
+         * Set the crosshairs to distance away from center of 
+         * ball in direction ball will travel
+         */
+        //% blockId=updatecross block="update crosshairs on $this || using distance $dist "
+        //% expandableArgumentMode=toggle
+        //% color="#b70082"
+        //% weight=50
+        //% group=ball
+        //% this.defl=myBall
+        //% dist.defl=3
+        public update_crosshair(dist?: number) {
+            if (dist == undefined) { dist = 3; }
+            spriteutils.placeAngleFrom(
+                this.moon,
+                this.angle * Math.PI / -180,
+                Math.max(this.width + dist, this.height + dist),
+                this
+            )
+        }
+
+        /**
+         * Set whether to control the throwable with the arrow keys; left and right
+         * to adjust the angle, and up and down to increase / decrease power
+         * @param on whether to turn on or off this feature, eg: true
+         */
+        //% color="#b70082"
+        //% group=ball
+        //% blockId=controlWithKeys block="control $this with arrow keys || $on=toggleOnOff"
+        //% this.defl=myBall
+        //% expandableArgumentMode=toggle
+
+        public controlWithArrowKeys(on: boolean = true): void {
+            this.controlKeys = on;
+
+            game.onUpdate(() => {
+                if (this.controlKeys) {
+                    this.angle -= controller.dx() * this.angleRate / 2;
+                    this.pow -= controller.dy() * this.powerRate / 2;
+                }
+            })
+        }
+     
     }
 
-    /**
-     * Set whether to control the throwable with the arrow keys; left and right
-     * to adjust the angle, and up and down to increase / decrease power
-     * @param on whether to turn on or off this feature, eg: true
-     */
-    //% color="#b70082"
-    //% group=ball
-    //% blockId=controlWithKeys block="control $this with arrow keys || $on=toggleOnOff"
-    //% this.defl=myBall
-    //% expandableArgumentMode=toggle
-
-    public controlWithArrowKeys(on: boolean = true): void {
-        this.controlKeys = on;
-
-        game.onUpdate(() => {
-            if (this.controlKeys) {
-                this.angle -= controller.dx() * this.angleRate / 2;
-                this.pow -= controller.dy() * this.powerRate / 2;
-            }
-        })
-    }
-
-        
-    }
 
 
-
-/**
- * Automatically adjust ball power using
- * statusbar as an indicator
-*/
+    /*
+    * Automatically adjust ball power using
+    * statusbar as an indicator
+    */
     //% color="#b70082"
     //% group=ball
     //% blockId=variablePower block="vary $thisBall power using $status from $minNum \\% to $maxNum \\% || speed $thisSpeed"
@@ -980,14 +978,13 @@ namespace carnival {
         })
     }
 
-    /**
-         * Throw the throwable with the current settings
-         */
-        //% blockId=throwIt block="toss $thisBall(myBall)"
-        //% weight=50
-        //% color="#b70082"
-        //% group=ball
-        //% thisBall.defl=thisBall
+    /*
+     * Throw the throwable with the current settings
+     */
+    //% color="#b70082"
+    //% group=ball
+    //% blockId=throwIt block="toss $thisBall"
+    //% thisBall.defl=myBall
     export function throwIt(thisBall:Ball): void {
         thisBall.vx = carnival.xComponent(thisBall.angle, thisBall.pow);
         thisBall.vy = carnival.yComponent(thisBall.angle, thisBall.pow);
@@ -995,13 +992,13 @@ namespace carnival {
         thisBall.ax = thisBall.wind;
     }
 
-        /**
-         * Stop the throwable at the current location
-         */
-        //% blockId=stopIt block="stop $thisBall"
-        //% thisBall.defl=myBall
-        //% color="#b70082"
-        //% group=ball
+    /*
+     * Stop the throwable at the current location
+     */
+    //% color="#b70082"
+    //% group=ball
+    //% blockId=stopIt block="stop $thisBall"
+    //% thisBall.defl=myBall
     export function stopIt(thisBall:Ball): void {
         thisBall.ay = 0;
         thisBall.ax = 0;
